@@ -1,0 +1,624 @@
+// Sistem Informasi Kesiswaan — SMK Negeri 1 Banjar
+// Skema lengkap (dipakai bertahap di Tahap 1–5).
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Enum ─────────────────────────
+
+enum Role {
+  ADMIN
+  PKS
+  GURU
+  WALI_KELAS
+  BK
+  KEPSEK
+  ORANG_TUA
+}
+
+enum Gender {
+  L
+  P
+}
+
+enum ParentRelation {
+  AYAH
+  IBU
+  WALI
+}
+
+enum Semester {
+  GANJIL
+  GENAP
+}
+
+enum ViolationLevel {
+  RINGAN
+  SEDANG
+  BERAT
+}
+
+enum IncidentStatus {
+  MENUNGGU_VERIFIKASI
+  TERVERIFIKASI
+  DITOLAK
+}
+
+enum CaseStatus {
+  BARU
+  DIJADWALKAN
+  PROSES_PENDAMPINGAN
+  MENUNGGU_EVALUASI
+  SELESAI
+  DIRUJUK
+}
+
+enum CasePriority {
+  RENDAH
+  SEDANG
+  TINGGI
+}
+
+enum LetterType {
+  PANGGILAN_1
+  PANGGILAN_2
+  PANGGILAN_3
+  PERJANJIAN
+  PERNYATAAN
+}
+
+enum LetterStatus {
+  DRAFT
+  TERKIRIM
+  DIKONFIRMASI
+  HADIR
+  TIDAK_HADIR
+  JADWAL_ULANG
+}
+
+enum SessionType {
+  KONSELING_INDIVIDU
+  KONSELING_KELOMPOK
+  HOME_VISIT
+  MEDIASI
+  KONFERENSI_KASUS
+}
+
+enum SessionStatus {
+  DIJADWALKAN
+  SELESAI
+  BATAL
+}
+
+enum QueueStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+// ───────────────────────── Pengguna & Auth ─────────────────────────
+
+model User {
+  id                 String    @id @default(cuid())
+  name               String
+  username           String    @unique
+  passwordHash       String
+  role               Role
+  phone              String?
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(false)
+  lastLoginAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  teacher Teacher?
+  parent  Parent?
+
+  reportedIncidents  Incident[]          @relation("IncidentReporter")
+  verifiedIncidents  Incident[]          @relation("IncidentVerifier")
+  achievements       Achievement[]
+  assignedCases      Case[]              @relation("CaseAssignedBk")
+  createdCases       Case[]              @relation("CaseCreatedBy")
+  approvedCases      Case[]              @relation("CaseApprovedBy")
+  createdLetters     SummonsLetter[]     @relation("LetterCreatedBy")
+  approvedLetters    SummonsLetter[]     @relation("LetterApprovedBy")
+  counselingSessions CounselingSession[]
+  notifications      Notification[]
+  followUpNotes      FollowUpNote[]
+  auditLogs          AuditLog[]
+
+  @@index([role])
+}
+
+/// Pencatat percobaan login untuk rate limit (disimpan di DB karena Passenger bisa multi-proses).
+model LoginAttempt {
+  key         String    @id
+  count       Int       @default(0)
+  windowStart DateTime  @default(now())
+  lockedUntil DateTime?
+}
+
+// ───────────────────────── Setting ─────────────────────────
+
+model SchoolSetting {
+  id                       Int      @id @default(1)
+  schoolName               String   @default("SMK Negeri 1 Banjar")
+  npsn                     String?
+  governmentLine1          String   @default("PEMERINTAH PROVINSI BALI")
+  governmentLine2          String   @default("DINAS PENDIDIKAN, KEPEMUDAAN DAN OLAHRAGA")
+  address                  String   @default("Jl. Raya Banjar, Kec. Banjar, Kab. Buleleng, Bali")
+  phone                    String?
+  email                    String?
+  website                  String?
+  logoPath                 String?
+  principalName            String   @default("")
+  principalNip             String   @default("")
+  letterNumberFormat       String   @default("421.5/{urut}/SMKN1BJR/BK/{bulan_romawi}/{tahun}")
+  waEnabled                Boolean  @default(false)
+  waViolationTemplate      String   @db.Text
+  achievementReducesPoints Boolean  @default(false)
+  kepsekCanReadCounseling  Boolean  @default(false)
+  parentOtpEnabled         Boolean  @default(false)
+  updatedAt                DateTime @updatedAt
+}
+
+// ───────────────────────── Master data ─────────────────────────
+
+model AcademicYear {
+  id        String    @id @default(cuid())
+  name      String    @unique // "2026/2027"
+  semester  Semester  @default(GANJIL) // semester berjalan
+  startDate DateTime?
+  endDate   DateTime?
+  isActive  Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  classes      Class[]
+  incidents    Incident[]
+  achievements Achievement[]
+  cases        Case[]
+}
+
+model Teacher {
+  id        String   @id @default(cuid())
+  nip       String?  @unique
+  name      String
+  phone     String?
+  isActive  Boolean  @default(true)
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  homeroomClasses Class[]
+}
+
+model Class {
+  id             String       @id @default(cuid())
+  name           String // "XI TKJ 1"
+  major          String // jurusan, mis. "TKJ"
+  grade          Int // 10 / 11 / 12
+  waliKelasId    String?
+  waliKelas      Teacher?     @relation(fields: [waliKelasId], references: [id], onDelete: SetNull)
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  createdAt      DateTime     @default(now())
+
+  students Student[]
+
+  @@unique([name, academicYearId])
+  @@index([academicYearId])
+  @@index([waliKelasId])
+}
+
+model Student {
+  id        String    @id @default(cuid())
+  nisn      String    @unique
+  nis       String?
+  name      String
+  gender    Gender
+  birthDate DateTime?
+  address   String?   @db.Text
+  photoPath String?
+  isActive  Boolean   @default(true)
+  classId   String?
+  class     Class?    @relation(fields: [classId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  parents       StudentParent[]
+  incidents     IncidentStudent[]
+  achievements  Achievement[]
+  cases         Case[]
+  followUpNotes FollowUpNote[]
+
+  @@index([classId])
+  @@index([name])
+}
+
+model Parent {
+  id         String         @id @default(cuid())
+  name       String
+  relation   ParentRelation
+  waNumber   String? // format 62xxxxxxxxxx
+  occupation String?
+  address    String?        @db.Text
+  userId     String?        @unique
+  user       User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  students StudentParent[]
+
+  @@index([name])
+}
+
+model StudentParent {
+  studentId String
+  parentId  String
+  isPrimary Boolean @default(false)
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  parent    Parent  @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, parentId])
+  @@index([parentId])
+}
+
+model ViolationCategory {
+  id        String         @id @default(cuid())
+  level     ViolationLevel @unique
+  name      String
+  sortOrder Int            @default(0)
+
+  types ViolationType[]
+}
+
+model ViolationType {
+  id          String            @id @default(cuid())
+  code        String            @unique
+  name        String
+  categoryId  String
+  category    ViolationCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  points      Int
+  description String?           @db.Text
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  incidentStudents IncidentStudent[]
+
+  @@index([categoryId])
+}
+
+// ───────────────────────── Kejadian & poin ─────────────────────────
+
+model Incident {
+  id              String         @id @default(cuid())
+  occurredAt      DateTime // tanggal + jam kejadian (UTC; ditampilkan WITA)
+  location        String
+  chronology      String         @db.Text
+  initialAction   String?        @db.Text
+  reporterName    String? // pelapor jika berbeda dari pencatat
+  witnesses       String?        @db.Text
+  status          IncidentStatus @default(MENUNGGU_VERIFIKASI)
+  reporterId      String
+  reporter        User           @relation("IncidentReporter", fields: [reporterId], references: [id], onDelete: Restrict)
+  verifiedById    String?
+  verifiedBy      User?          @relation("IncidentVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+  verifiedAt      DateTime?
+  rejectionReason String?        @db.Text
+  academicYearId  String
+  academicYear    AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  deletedAt       DateTime?
+  deleteReason    String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  students      IncidentStudent[]
+  attachments   IncidentAttachment[]
+  cases         CaseIncident[]
+  followUpNotes FollowUpNote[]
+
+  @@index([status])
+  @@index([occurredAt])
+  @@index([academicYearId])
+  @@index([deletedAt])
+}
+
+model IncidentStudent {
+  id              String         @id @default(cuid())
+  incidentId      String
+  incident        Incident       @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  studentId       String
+  student         Student        @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  violationTypeId String
+  violationType   ViolationType  @relation(fields: [violationTypeId], references: [id], onDelete: Restrict)
+  // snapshot agar perubahan master tidak mengubah riwayat
+  points          Int
+  violationName   String
+  level           ViolationLevel
+  classId         String?
+  className       String?
+
+  @@unique([incidentId, studentId, violationTypeId])
+  @@index([studentId])
+  @@index([classId])
+  @@index([violationTypeId])
+}
+
+model IncidentAttachment {
+  id         String   @id @default(cuid())
+  incidentId String
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  path       String
+  mimeType   String
+  size       Int
+  createdAt  DateTime @default(now())
+
+  @@index([incidentId])
+}
+
+model Achievement {
+  id             String       @id @default(cuid())
+  studentId      String
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  date           DateTime
+  title          String
+  level          String? // sekolah / kabupaten / provinsi / nasional
+  points         Int          @default(0)
+  description    String?      @db.Text
+  attachmentPath String?
+  recordedById   String
+  recordedBy     User         @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  deletedAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([studentId])
+  @@index([academicYearId])
+}
+
+model SanctionThreshold {
+  id               String          @id @default(cuid())
+  minPoints        Int             @unique
+  action           String          @db.Text
+  templateId       String?
+  template         LetterTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  autoCreateCase   Boolean         @default(false)
+  requiresApproval Boolean         @default(false) // butuh persetujuan Kepsek
+  notifyRoles      Json // Role[]
+  color            String          @default("amber") // green | amber | red
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  cases Case[]
+}
+
+// ───────────────────────── Modul BK ─────────────────────────
+
+model Case {
+  id                String             @id @default(cuid())
+  studentId         String
+  student           Student            @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  academicYearId    String
+  academicYear      AcademicYear       @relation(fields: [academicYearId], references: [id], onDelete: Restrict)
+  title             String
+  status            CaseStatus         @default(BARU)
+  priority          CasePriority       @default(SEDANG)
+  thresholdId       String?
+  threshold         SanctionThreshold? @relation(fields: [thresholdId], references: [id], onDelete: SetNull)
+  needsLetter       Boolean            @default(false)
+  needsApproval     Boolean            @default(false)
+  approvedById      String?
+  approvedBy        User?              @relation("CaseApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt        DateTime?
+  assignedBkId      String?
+  assignedBk        User?              @relation("CaseAssignedBk", fields: [assignedBkId], references: [id], onDelete: SetNull)
+  createdById       String?
+  createdBy         User?              @relation("CaseCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  referredTo        String?
+  openedAt          DateTime           @default(now())
+  closedAt          DateTime?
+  evaluationSummary String?            @db.Text
+  updatedAt         DateTime           @updatedAt
+
+  incidents CaseIncident[]
+  letters   SummonsLetter[]
+  sessions  CounselingSession[]
+
+  @@index([studentId])
+  @@index([status])
+  @@index([academicYearId])
+  @@index([assignedBkId])
+}
+
+model CaseIncident {
+  caseId     String
+  incidentId String
+  case       Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+
+  @@id([caseId, incidentId])
+  @@index([incidentId])
+}
+
+model LetterTemplate {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  name      String
+  type      LetterType
+  body      String     @db.LongText
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  thresholds SanctionThreshold[]
+  letters    SummonsLetter[]
+}
+
+model SummonsLetter {
+  id               String         @id @default(cuid())
+  caseId           String
+  case             Case           @relation(fields: [caseId], references: [id], onDelete: Restrict)
+  templateId       String
+  template         LetterTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  type             LetterType
+  letterNumber     String         @unique
+  letterDate       DateTime
+  meetingAt        DateTime
+  place            String
+  subject          String
+  bodySnapshot     String?        @db.LongText
+  status           LetterStatus   @default(DRAFT)
+  verifyToken      String         @unique
+  pdfPath          String?
+  parentResponse   String? // HADIR | JADWAL_ULANG
+  parentResponseAt DateTime?
+  rescheduleReason String?        @db.Text
+  attendanceNote   String?        @db.Text
+  reminderSentAt   DateTime?
+  sentAt           DateTime?
+  createdById      String
+  createdBy        User           @relation("LetterCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  approvedById     String?
+  approvedBy       User?          @relation("LetterApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt       DateTime?
+  deletedAt        DateTime?
+  deleteReason     String?        @db.Text
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([caseId])
+  @@index([status])
+  @@index([meetingAt])
+}
+
+model LetterCounter {
+  id         String     @id @default(cuid())
+  year       Int
+  type       LetterType
+  lastNumber Int        @default(0)
+
+  @@unique([year, type])
+}
+
+model CounselingSession {
+  id             String        @id @default(cuid())
+  caseId         String
+  case           Case          @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  scheduledAt    DateTime
+  type           SessionType
+  status         SessionStatus @default(DIJADWALKAN)
+  place          String?
+  attendees      String?       @db.Text
+  problem        String?       @db.Text
+  result         String?       @db.Text
+  followUpPlan   String?       @db.Text
+  isConfidential Boolean       @default(true)
+  counselorId    String
+  counselor      User          @relation(fields: [counselorId], references: [id], onDelete: Restrict)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  attachments CounselingAttachment[]
+
+  @@index([caseId])
+  @@index([scheduledAt])
+}
+
+model CounselingAttachment {
+  id        String            @id @default(cuid())
+  sessionId String
+  session   CounselingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  path      String
+  mimeType  String
+  size      Int
+  createdAt DateTime          @default(now())
+
+  @@index([sessionId])
+}
+
+// ───────────────────────── Notifikasi ─────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String    @db.Text
+  link      String?
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+/// Antrean + log pengiriman WhatsApp (NotificationLog).
+model WaQueue {
+  id            String      @id @default(cuid())
+  to            String
+  recipientName String?
+  message       String      @db.Text
+  status        QueueStatus @default(PENDING)
+  retryCount    Int         @default(0)
+  maxRetry      Int         @default(3)
+  responseBody  String?     @db.Text
+  errorMessage  String?     @db.Text
+  context       String? // INCIDENT | LETTER | REMINDER | TEST | PIN ...
+  refId         String?
+  nextAttemptAt DateTime    @default(now())
+  sentAt        DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status, nextAttemptAt])
+  @@index([context, refId])
+  @@index([createdAt])
+}
+
+/// Catatan tindak lanjut wali kelas.
+model FollowUpNote {
+  id         String    @id @default(cuid())
+  studentId  String
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  incidentId String?
+  incident   Incident? @relation(fields: [incidentId], references: [id], onDelete: SetNull)
+  authorId   String
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  note       String    @db.Text
+  createdAt  DateTime  @default(now())
+
+  @@index([studentId])
+  @@index([incidentId])
+}
+
+// ───────────────────────── Audit ─────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // CREATE | UPDATE | DELETE | VERIFY | LOGIN ...
+  entity    String
+  entityId  String?
+  before    Json?
+  after     Json?
+  ip        String?
+  userAgent String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
