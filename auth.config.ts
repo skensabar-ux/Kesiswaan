@@ -12,15 +12,12 @@ export const authConfig = {
   session: { strategy: "jwt", maxAge: 60 * 60 * 12 },
   providers: [],
   callbacks: {
-    jwt({ token, user, trigger, session }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id!;
         token.role = user.role;
         token.username = user.username;
         token.mustChangePassword = user.mustChangePassword;
-      }
-      if (trigger === "update" && session && typeof session.mustChangePassword === "boolean") {
-        token.mustChangePassword = session.mustChangePassword;
       }
       return token;
     },

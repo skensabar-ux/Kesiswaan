@@ -57,7 +57,7 @@ export default async function Page() {
                 return (
                   <TR key={r.id} className={r.isActive ? undefined : "opacity-60"}>
                     <TD>
-                      <span className="inline-flex items-center gap-2 font-semibold">
+                      <span className="inline-flex items-center gap-2 whitespace-nowrap font-semibold">
                         <span className={cn("size-2.5 rounded-full", DOT[r.color])} />≥ {r.minPoints}
                       </span>
                     </TD>

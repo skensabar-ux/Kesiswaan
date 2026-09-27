@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import { z } from "zod";
-import { signIn, signOut, unstable_update } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { audit } from "@/lib/audit";
 import { requireRole } from "@/lib/rbac";
@@ -72,7 +72,11 @@ export async function changePassword(input: z.infer<typeof changePasswordSchema>
       data: { passwordHash: await bcrypt.hash(data.newPassword, 10), mustChangePassword: false },
     });
     await audit({ userId: me.id, action: "CHANGE_PASSWORD", entity: "User", entityId: me.id });
-    await unstable_update({ user: {}, mustChangePassword: false } as never);
+    // Terbitkan ulang sesi (JWT) agar flag mustChangePassword di token ikut diperbarui.
+    if (user.role !== "ORANG_TUA") {
+      // signIn() di server action selalu melempar NEXT_REDIRECT (diteruskan oleh runAction).
+      await signIn("staff", { username: user.username, password: data.newPassword, redirectTo: "/" });
+    }
     return { ok: true, message: "Password berhasil diganti." };
   });
 }

@@ -26,7 +26,7 @@ async function logLogin(userId: string, ip: string) {
   ]);
 }
 
-export const { handlers, auth, signIn, signOut, unstable_update } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     // Staf: username / NIP + password
