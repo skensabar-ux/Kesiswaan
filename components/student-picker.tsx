@@ -11,11 +11,13 @@ export function StudentPicker({
   onChange,
   multiple = true,
   placeholder = "Ketik nama, NISN, atau kelas…",
+  purpose,
 }: {
   value: StudentOption[];
   onChange: (v: StudentOption[]) => void;
   multiple?: boolean;
   placeholder?: string;
+  purpose?: "report";
 }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState<StudentOption[]>([]);
@@ -26,9 +28,9 @@ export function StudentPicker({
       setResults([]);
       return;
     }
-    const t = setTimeout(() => start(async () => setResults(await searchStudents(q))), 300);
+    const t = setTimeout(() => start(async () => setResults(await searchStudents(q, { purpose }))), 300);
     return () => clearTimeout(t);
-  }, [q]);
+  }, [q, purpose]);
 
   const selectedIds = new Set(value.map((v) => v.id));
   const pick = (s: StudentOption) => {

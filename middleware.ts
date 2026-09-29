@@ -21,14 +21,14 @@ export default auth((req) => {
 
   if (isApi) return NextResponse.next(); // route handler memeriksa hak akses sendiri
 
-  if (user.mustChangePassword && pathname !== "/ganti-password") {
-    return NextResponse.redirect(new URL("/ganti-password", req.nextUrl));
-  }
-
   if (!canAccessPath(user.role, pathname)) {
     return NextResponse.redirect(new URL(homePathFor(user.role), req.nextUrl));
   }
-  return NextResponse.next();
+  // Kewajiban ganti password & status aktif dicek di layout (dari database), bukan dari token:
+  // cookie sesi bisa tertimpa token lama oleh request yang sedang berjalan.
+  const headers = new Headers(req.headers);
+  headers.set("x-pathname", pathname);
+  return NextResponse.next({ request: { headers } });
 });
 
 export const config = {

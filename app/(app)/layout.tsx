@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { ROLE_LABEL } from "@/lib/roles";
 import { Sidebar } from "@/components/layout/sidebar";
@@ -10,6 +12,13 @@ import { ThemeToggle } from "@/components/theme-toggle";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
+  // Sumber kebenaran = database (lihat catatan di middleware.ts)
+  const [account, h] = await Promise.all([
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { isActive: true, mustChangePassword: true } }),
+    headers(),
+  ]);
+  if (!account?.isActive) redirect("/login?error=nonaktif");
+  if (account.mustChangePassword && h.get("x-pathname") !== "/ganti-password") redirect("/ganti-password");
   const settings = await getSettings();
   const { role, name } = session.user;
 

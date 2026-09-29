@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChangePasswordForm } from "./form";
@@ -8,7 +9,9 @@ export const metadata = { title: "Ganti Password" };
 export default async function Page() {
   const session = await auth();
   const isParent = session?.user.role === "ORANG_TUA";
-  const forced = session?.user.mustChangePassword;
+  const forced = session?.user.id
+    ? (await prisma.user.findUnique({ where: { id: session.user.id }, select: { mustChangePassword: true } }))?.mustChangePassword
+    : false;
   return (
     <div className="mx-auto max-w-md">
       <PageHeader

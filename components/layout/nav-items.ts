@@ -1,5 +1,8 @@
 import {
   BookUser,
+  ClipboardCheck,
+  ClipboardList,
+  Contact,
   CalendarRange,
   FileText,
   GraduationCap,
@@ -28,11 +31,20 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    label: "Kesiswaan",
+    items: [
+      { href: "/kejadian", label: "Kejadian", icon: ClipboardList, roles: STAFF, mobile: true },
+      { href: "/kejadian/verifikasi", label: "Verifikasi", icon: ClipboardCheck, roles: ["ADMIN", "PKS"], mobile: true },
+      { href: "/siswa", label: "Siswa", icon: Contact, roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"], mobile: true },
+      { href: "/kelas", label: "Kelas", icon: School, roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"], mobile: true },
+    ],
+  },
+  {
     label: "Master Data",
     items: [
-      { href: "/master/siswa", label: "Siswa", icon: GraduationCap, roles: ["ADMIN"], mobile: true },
+      { href: "/master/siswa", label: "Data Siswa", icon: GraduationCap, roles: ["ADMIN"] },
       { href: "/master/ortu", label: "Orang Tua", icon: BookUser, roles: ["ADMIN"] },
-      { href: "/master/kelas", label: "Kelas", icon: School, roles: ["ADMIN"], mobile: true },
+      { href: "/master/kelas", label: "Data Kelas", icon: School, roles: ["ADMIN"] },
       { href: "/master/guru", label: "Guru", icon: Users, roles: ["ADMIN"] },
       { href: "/master/tahun-ajaran", label: "Tahun Ajaran", icon: CalendarRange, roles: ["ADMIN"] },
       { href: "/master/jenis-pelanggaran", label: "Jenis Pelanggaran", icon: ShieldAlert, roles: ["ADMIN"] },
@@ -55,5 +67,7 @@ export function navFor(role: AppRole): NavGroup[] {
 }
 
 export function isActive(pathname: string, href: string) {
-  return href === "/" || href === "/ortu" ? pathname === href : pathname === href || pathname.startsWith(href + "/");
+  if (href === "/" || href === "/ortu") return pathname === href;
+  if (href === "/kejadian" && pathname.startsWith("/kejadian/verifikasi")) return false;
+  return pathname === href || pathname.startsWith(href + "/");
 }

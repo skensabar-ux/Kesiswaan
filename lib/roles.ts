@@ -35,7 +35,7 @@ export const ROUTE_RULES: RouteRule[] = (
   { prefix: "/audit", roles: ["ADMIN", "KEPSEK"] },
   { prefix: "/kejadian/verifikasi", roles: ["ADMIN", "PKS"] },
   { prefix: "/kejadian", roles: STAFF_ROLES },
-  { prefix: "/siswa", roles: STAFF_ROLES },
+  { prefix: "/siswa", roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"] },
   { prefix: "/kelas", roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"] },
   { prefix: "/bk", roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
   { prefix: "/laporan", roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },

@@ -180,10 +180,11 @@ model AcademicYear {
   isActive  Boolean   @default(false)
   createdAt DateTime  @default(now())
 
-  classes      Class[]
-  incidents    Incident[]
-  achievements Achievement[]
-  cases        Case[]
+  classes       Class[]
+  incidents     Incident[]
+  achievements  Achievement[]
+  cases         Case[]
+  thresholdHits ThresholdHit[]
 }
 
 model Teacher {
@@ -238,6 +239,7 @@ model Student {
   achievements  Achievement[]
   cases         Case[]
   followUpNotes FollowUpNote[]
+  thresholdHits ThresholdHit[]
 
   @@index([classId])
   @@index([name])
@@ -401,6 +403,24 @@ model SanctionThreshold {
   updatedAt        DateTime        @updatedAt
 
   cases Case[]
+  hits  ThresholdHit[]
+}
+
+/// Penanda ambang poin yang sudah tercapai (agar tidak terpicu dua kali dalam satu tahun ajaran).
+model ThresholdHit {
+  id             String            @id @default(cuid())
+  studentId      String
+  student        Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  academicYearId String
+  academicYear   AcademicYear      @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  thresholdId    String
+  threshold      SanctionThreshold @relation(fields: [thresholdId], references: [id], onDelete: Cascade)
+  incidentId     String?
+  totalPoints    Int
+  reachedAt      DateTime          @default(now())
+
+  @@unique([studentId, academicYearId, thresholdId])
+  @@index([academicYearId])
 }
 
 // ───────────────────────── Modul BK ─────────────────────────
