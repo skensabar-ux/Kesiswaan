@@ -23,6 +23,7 @@ function previewNumber(format: string) {
   const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"][now.getMonth()];
   return format
     .replaceAll("{urut}", "007")
+    .replaceAll("{jenis}", "SP1")
     .replaceAll("{bulan_romawi}", roman!)
     .replaceAll("{bulan}", String(now.getMonth() + 1).padStart(2, "0"))
     .replaceAll("{tahun}", String(now.getFullYear()));
@@ -123,8 +124,8 @@ export function SettingsForm({ initial, logoPath }: { initial: V; logoPath: stri
             className="md:col-span-2"
             hint={
               <>
-                Placeholder: {"{urut}"} {"{bulan_romawi}"} {"{bulan}"} {"{tahun}"}. Contoh: <span className="font-mono">{previewNumber(format ?? "")}</span>. Nomor urut
-                direset setiap tahun per jenis surat.
+                Placeholder: {"{urut}"} {"{jenis}"} {"{bulan_romawi}"} {"{bulan}"} {"{tahun}"}. Contoh: <span className="font-mono">{previewNumber(format ?? "")}</span>.
+                Nomor urut direset tiap tahun; tanpa {"{jenis}"} semua jenis surat memakai satu urutan, dengan {"{jenis}"} (SP1/SP2/SP3/SPJ/SPN) urutan per jenis.
               </>
             }
           >

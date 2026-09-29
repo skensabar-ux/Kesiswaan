@@ -10,6 +10,7 @@ import { formatDate, formatShortDate, witaParts } from "@/lib/date";
 import { displayPhone, maskPhone } from "@/lib/phone";
 import { GENDER_LABEL, LETTER_TYPE_LABEL, RELATION_LABEL } from "@/lib/constants";
 import { ACHIEVEMENT_LEVEL_LABEL } from "@/lib/validators/incident";
+import { LETTER_STATUS_LABEL } from "@/lib/letter";
 import { PageHeader } from "@/components/page-header";
 import { CaseStatusBadge, IncidentStatusBadge, PointsBadge } from "@/components/status-badges";
 import { LevelBadge } from "@/components/level-badge";
@@ -300,7 +301,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             {cases.map((c) => (
               <div key={c.id} className="rounded-md border p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-medium">{c.title}</p>
+                  {user.role === "WALI_KELAS" ? (
+                    <p className="font-medium">{c.title}</p>
+                  ) : (
+                    <Link href={`/bk/kasus/${c.id}`} className="font-medium hover:underline">
+                      {c.title}
+                    </Link>
+                  )}
                   <div className="flex items-center gap-1.5">
                     {c.priority === "TINGGI" && <Badge variant="destructive">Prioritas tinggi</Badge>}
                     <CaseStatusBadge status={c.status} />
@@ -313,7 +320,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 </p>
                 {c.letters.map((l) => (
                   <p key={l.id} className="mt-1 text-xs">
-                    {LETTER_TYPE_LABEL[l.type]} · {l.letterNumber} · {formatShortDate(l.meetingAt)} · {l.status}
+                    {LETTER_TYPE_LABEL[l.type]} · {l.letterNumber} · {formatShortDate(l.meetingAt)} · {LETTER_STATUS_LABEL[l.status]}
                   </p>
                 ))}
               </div>

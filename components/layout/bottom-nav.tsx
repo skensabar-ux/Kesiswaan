@@ -8,15 +8,12 @@ import { cn } from "@/lib/utils";
 import type { AppRole } from "@/lib/roles";
 import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { NavList } from "@/components/layout/sidebar";
-import { isActive, navFor } from "@/components/layout/nav-items";
+import { isActive, mobileItemsFor, navFor } from "@/components/layout/nav-items";
 
 export function BottomNav({ role }: { role: AppRole }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const items = navFor(role)
-    .flatMap((g) => g.items)
-    .filter((i) => i.mobile)
-    .slice(0, 4);
+  const items = mobileItemsFor(role);
   const all = navFor(role).flatMap((g) => g.items);
   const showMenu = all.length > items.length;
 

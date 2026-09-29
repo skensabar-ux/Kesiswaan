@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     { label: "Kejadian hari ini", value: todayCount, icon: ClipboardList, href: "/kejadian" },
     { label: "Kejadian minggu ini", value: weekCount, icon: CalendarRange, href: "/kejadian" },
     ...(isVerifier ? [{ label: "Menunggu verifikasi", value: pending, icon: ClipboardCheck, href: "/kejadian/verifikasi" }] : []),
-    ...(openCases !== null ? [{ label: "Kasus BK aktif", value: openCases, icon: ShieldAlert, href: "/siswa" }] : []),
+    ...(openCases !== null ? [{ label: "Kasus BK aktif", value: openCases, icon: ShieldAlert, href: "/bk/kasus" }] : []),
     ...(user.role === "ADMIN" ? [{ label: "Siswa aktif", value: students, icon: GraduationCap, href: "/master/siswa" }] : []),
   ].slice(0, 4);
 

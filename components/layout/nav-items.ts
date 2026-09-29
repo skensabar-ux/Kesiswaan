@@ -6,6 +6,9 @@ import {
   CalendarRange,
   FileText,
   GraduationCap,
+  CalendarDays,
+  HeartHandshake,
+  Mail,
   LayoutDashboard,
   MessageCircle,
   Scale,
@@ -41,6 +44,14 @@ export const NAV: NavGroup[] = [
     ],
   },
   {
+    label: "Bimbingan Konseling",
+    items: [
+      { href: "/bk/kasus", label: "Kasus BK", icon: HeartHandshake, roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
+      { href: "/bk/surat", label: "Surat", icon: Mail, roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
+      { href: "/bk/kalender", label: "Kalender", icon: CalendarDays, roles: ["ADMIN", "BK", "KEPSEK"] },
+    ],
+  },
+  {
     label: "Master Data",
     items: [
       { href: "/master/siswa", label: "Data Siswa", icon: GraduationCap, roles: ["ADMIN"] },
@@ -63,6 +74,22 @@ export const NAV: NavGroup[] = [
     ],
   },
 ];
+
+/** Menu bawah (HP) per role: maks 4 item yang paling sering dipakai; sisanya di "Menu". */
+export const MOBILE_ORDER: Record<AppRole, string[]> = {
+  ADMIN: ["/", "/kejadian", "/siswa", "/bk/kasus"],
+  PKS: ["/", "/kejadian", "/kejadian/verifikasi", "/siswa"],
+  GURU: ["/", "/kejadian"],
+  WALI_KELAS: ["/", "/kejadian", "/kelas", "/siswa"],
+  BK: ["/", "/bk/kasus", "/bk/kalender", "/siswa"],
+  KEPSEK: ["/", "/bk/kasus", "/siswa", "/bk/surat"],
+  ORANG_TUA: ["/ortu"],
+};
+
+export function mobileItemsFor(role: AppRole): NavItem[] {
+  const all = navFor(role).flatMap((g) => g.items);
+  return MOBILE_ORDER[role].map((href) => all.find((i) => i.href === href)).filter((i): i is NavItem => Boolean(i));
+}
 
 export function navFor(role: AppRole): NavGroup[] {
   return NAV.map((g) => ({ ...g, items: g.items.filter((i) => i.roles.includes(role)) })).filter((g) => g.items.length);

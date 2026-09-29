@@ -37,6 +37,7 @@ export const ROUTE_RULES: RouteRule[] = (
   { prefix: "/kejadian", roles: STAFF_ROLES },
   { prefix: "/siswa", roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"] },
   { prefix: "/kelas", roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"] },
+  { prefix: "/bk/kalender", roles: ["ADMIN", "BK", "KEPSEK"] },
   { prefix: "/bk", roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
   { prefix: "/laporan", roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
   { prefix: "/ortu", roles: ["ORANG_TUA"] },
@@ -47,7 +48,7 @@ export const ROUTE_RULES: RouteRule[] = (
 ).sort((a, b) => b.prefix.length - a.prefix.length);
 
 /** Route publik (tanpa login). */
-export const PUBLIC_PREFIXES = ["/login", "/verifikasi", "/api/auth", "/api/cron", "/api/public"];
+export const PUBLIC_PREFIXES = ["/login", "/verifikasi", "/konfirmasi", "/api/auth", "/api/cron", "/api/public"];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
