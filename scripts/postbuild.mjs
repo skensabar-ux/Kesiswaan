@@ -39,5 +39,24 @@ for (const f of readdirSync(out)) {
   }
 }
 
+// Seed produksi (master data + 1 admin berpassword acak) dibundel agar bisa dijalankan di server:
+//   node scripts/seed.cjs --produksi
+try {
+  const { buildSync } = await import("esbuild");
+  buildSync({
+    entryPoints: [path.join(root, "prisma", "seed.ts")],
+    outfile: path.join(out, "scripts", "seed.cjs"),
+    bundle: true,
+    platform: "node",
+    format: "cjs",
+    target: "node18",
+    external: ["@prisma/client", ".prisma/client", "bcryptjs"],
+    logLevel: "warning",
+  });
+  console.log("[postbuild] prisma/seed.ts → .next/standalone/scripts/seed.cjs");
+} catch (e) {
+  console.warn("[postbuild] gagal membundel seed:", e.message);
+}
+
 mkdirSync(path.join(out, "uploads"), { recursive: true });
 console.log("[postbuild] selesai. Unggah isi .next/standalone ke folder aplikasi di cPanel.");

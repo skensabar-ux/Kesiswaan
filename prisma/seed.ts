@@ -1,6 +1,14 @@
 import { PrismaClient, type Gender, type LetterType, type Role, type ViolationLevel } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { DEFAULT_WA_VIOLATION_TEMPLATE } from "../lib/constants";
+
+/**
+ * Mode:
+ * - default (npm run db:seed)       : master data + DATA DEMO (akun demo berpassword sama, 30 siswa dummy) — untuk lokal
+ * - --produksi (node scripts/seed.cjs --produksi) : HANYA master data + 1 akun admin berpassword acak — untuk server
+ */
+const PRODUCTION = process.argv.includes("--produksi");
 
 const prisma = new PrismaClient();
 
@@ -161,20 +169,20 @@ const STAFF: { username: string; name: string; role: Role; nip?: string; phone?:
 ];
 
 async function main() {
-  console.log("▶ Seed dimulai…");
-  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
-  const pinHash = await bcrypt.hash(DEFAULT_PARENT_PIN, 10);
+  console.log(`▶ Seed dimulai (${PRODUCTION ? "PRODUKSI: master data saja" : "DEMO"})…`);
 
   await prisma.schoolSetting.upsert({
     where: { id: 1 },
-    create: {
-      id: 1,
-      waViolationTemplate: DEFAULT_WA_VIOLATION_TEMPLATE,
-      principalName: "Drs. I Gede Wirawan, M.Pd.",
-      principalNip: "196905151994031008",
-      phone: "(0362) 000000",
-      email: "smkn1banjar@example.sch.id",
-    },
+    create: PRODUCTION
+      ? { id: 1, waViolationTemplate: DEFAULT_WA_VIOLATION_TEMPLATE }
+      : {
+          id: 1,
+          waViolationTemplate: DEFAULT_WA_VIOLATION_TEMPLATE,
+          principalName: "Drs. I Gede Wirawan, M.Pd.",
+          principalNip: "196905151994031008",
+          phone: "(0362) 000000",
+          email: "smkn1banjar@example.sch.id",
+        },
     update: {},
   });
 
@@ -217,6 +225,26 @@ async function main() {
       update: {},
     });
   }
+
+  if (PRODUCTION) {
+    const existing = await prisma.user.findFirst({ where: { role: "ADMIN" } });
+    if (existing) {
+      console.log(`✔ Master data siap. Akun admin sudah ada (${existing.username}) — tidak diubah.`);
+    } else {
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+      const pwd = Array.from({ length: 12 }, () => alphabet[crypto.randomInt(0, alphabet.length)]).join("");
+      await prisma.user.create({
+        data: { username: "admin", name: "Administrator", role: "ADMIN", passwordHash: await bcrypt.hash(pwd, 10), mustChangePassword: true },
+      });
+      console.log("✔ Master data siap. Akun admin dibuat:");
+      console.log(`  username: admin   password sementara: ${pwd}`);
+      console.log("  (catat sekarang — password ini tidak ditampilkan lagi; wajib diganti saat login pertama)");
+    }
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  const pinHash = await bcrypt.hash(DEFAULT_PARENT_PIN, 10);
 
   // staf & guru
   const users: Record<string, string> = {};

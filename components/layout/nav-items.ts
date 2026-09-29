@@ -1,5 +1,7 @@
 import {
+  BarChart3,
   BookUser,
+  ListChecks,
   ClipboardCheck,
   ClipboardList,
   Contact,
@@ -41,6 +43,7 @@ export const NAV: NavGroup[] = [
       { href: "/kejadian/verifikasi", label: "Verifikasi", icon: ClipboardCheck, roles: ["ADMIN", "PKS"], mobile: true },
       { href: "/siswa", label: "Siswa", icon: Contact, roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"], mobile: true },
       { href: "/kelas", label: "Kelas", icon: School, roles: ["ADMIN", "PKS", "WALI_KELAS", "BK", "KEPSEK"], mobile: true },
+      { href: "/laporan", label: "Laporan", icon: BarChart3, roles: ["ADMIN", "PKS", "BK", "KEPSEK"] },
     ],
   },
   {
@@ -71,6 +74,7 @@ export const NAV: NavGroup[] = [
       { href: "/master/pengguna", label: "Pengguna", icon: UserCog, roles: ["ADMIN"] },
       { href: "/pengaturan", label: "Pengaturan", icon: Settings, roles: ["ADMIN"] },
       { href: "/pengaturan/wa", label: "Log WhatsApp", icon: MessageCircle, roles: ["ADMIN"] },
+      { href: "/audit", label: "Audit Log", icon: ListChecks, roles: ["ADMIN", "KEPSEK"] },
     ],
   },
 ];
