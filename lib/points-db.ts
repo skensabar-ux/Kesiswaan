@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { getSettings } from "@/lib/settings";
 import { accumulatePoints, maxPriority, newlyReachedThresholds, planCase, type ThresholdLike } from "@/lib/points";
 import { homeroomUserId, notifyUsers, userIdsByRoles } from "@/lib/notify";
+import { enqueueWa } from "@/lib/wa/queue";
+import { renderTemplate } from "@/lib/template";
+import { formatDate } from "@/lib/date";
+import { appUrl } from "@/lib/url";
 
 type Tx = Prisma.TransactionClient;
 
@@ -63,9 +67,23 @@ export type ApplySummary = { studentId: string; name: string; total: number; thr
 export async function applyVerifiedIncident(tx: Tx, incidentId: string, actorId: string): Promise<ApplySummary> {
   const incident = await tx.incident.findUniqueOrThrow({
     where: { id: incidentId },
-    include: { students: { include: { student: { select: { id: true, name: true, classId: true, class: { select: { name: true } } } } } } },
+    include: {
+      students: {
+        include: {
+          student: {
+            select: {
+              id: true,
+              name: true,
+              classId: true,
+              class: { select: { name: true, waliKelas: { select: { name: true, user: { select: { phone: true, isActive: true } } } } } },
+              parents: { select: { parent: { select: { name: true, waNumber: true } } } },
+            },
+          },
+        },
+      },
+    },
   });
-  const thresholds = await loadThresholds(tx);
+  const [thresholds, settings] = await Promise.all([loadThresholds(tx), getSettings()]);
   const yearId = incident.academicYearId;
   const link = `/kejadian/${incident.id}`;
   const summary: ApplySummary = [];
@@ -160,6 +178,40 @@ export async function applyVerifiedIncident(tx: Tx, incidentId: string, actorId:
         link: caseId ? `/siswa/${studentId}` : link,
       });
     }
+
+    // ── WhatsApp (antrean; dikirim bertahap oleh cron)
+    const walasInfo = student.class?.waliKelas;
+    const vars = {
+      nama_siswa: student.name,
+      kelas: cls,
+      tanggal: formatDate(incident.occurredAt),
+      jenis_pelanggaran: violationNames,
+      poin: pts,
+      total_poin: total,
+      nama_walas: walasInfo?.name ?? "-",
+    };
+    await enqueueWa(tx, [
+      ...student.parents.map(({ parent }) => ({
+        to: parent.waNumber,
+        recipientName: parent.name,
+        message: renderTemplate(settings.waViolationTemplate, { ...vars, nama_ortu: parent.name }),
+        context: "INCIDENT",
+        refId: incidentId,
+      })),
+      ...(walasInfo?.user?.isActive
+        ? [
+            {
+              to: walasInfo.user.phone,
+              recipientName: walasInfo.name,
+              message: `[Kesiswaan] ${student.name} (${cls}) tercatat: ${violationNames} (+${pts} poin). Total poin: ${total}.${
+                reached.length ? ` Ambang ${reached.at(-1)!.minPoints}: ${reached.at(-1)!.action}.` : ""
+              }\n${appUrl(link)}`,
+              context: "INCIDENT_WALAS",
+              refId: incidentId,
+            },
+          ]
+        : []),
+    ]);
 
     summary.push({ studentId, name: student.name, total, thresholds: reached.map((t) => t.minPoints), caseAction: plan.action });
   }

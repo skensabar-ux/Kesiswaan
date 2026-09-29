@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { UserMenu } from "@/components/layout/user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -19,7 +20,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ]);
   if (!account?.isActive) redirect("/login?error=nonaktif");
   if (account.mustChangePassword && h.get("x-pathname") !== "/ganti-password") redirect("/ganti-password");
-  const settings = await getSettings();
+  const [settings, unread] = await Promise.all([
+    getSettings(),
+    prisma.notification.count({ where: { userId: session.user.id, isRead: false } }),
+  ]);
   const { role, name } = session.user;
 
   return (
@@ -32,6 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <span className="truncate text-sm font-semibold">Kesiswaan</span>
           </div>
           <div className="ml-auto flex items-center gap-1">
+            <NotificationBell unread={unread} />
             <ThemeToggle />
             <UserMenu name={name ?? ""} roleLabel={ROLE_LABEL[role]} />
           </div>

@@ -36,7 +36,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             Akun Anda dinonaktifkan. Hubungi administrator sekolah.
           </p>
         )}
-        <LoginForm callbackUrl={sp(params.callbackUrl)} />
+        <LoginForm callbackUrl={sp(params.callbackUrl)} otpEnabled={settings.parentOtpEnabled && settings.waEnabled} />
       </div>
     </main>
   );

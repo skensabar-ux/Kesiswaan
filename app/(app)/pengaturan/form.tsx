@@ -136,7 +136,12 @@ export function SettingsForm({ initial, logoPath }: { initial: V; logoPath: stri
       <Card>
         <CardHeader>
           <CardTitle>Notifikasi WhatsApp</CardTitle>
-          <CardDescription>Konfigurasi gateway (URL & token) diatur lewat environment variable. Tes kirim tersedia di Tahap 3.</CardDescription>
+          <CardDescription>
+            Konfigurasi gateway (driver, URL & token) diatur lewat environment variable.{" "}
+            <a href="/pengaturan/wa" className="font-medium text-primary underline-offset-4 hover:underline">
+              Buka log WhatsApp & tes kirim →
+            </a>
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <CheckboxField label="Aktifkan pengiriman WA" description="Bila nonaktif, pesan tetap masuk antrean tetapi tidak dikirim." {...f.register("waEnabled")} />
@@ -168,7 +173,7 @@ export function SettingsForm({ initial, logoPath }: { initial: V; logoPath: stri
           />
           <CheckboxField
             label="Login orang tua dengan OTP WhatsApp"
-            description="Memerlukan WA gateway aktif (Tahap 3)."
+            description="Orang tua dapat meminta kode sekali pakai via WA sebagai pengganti PIN. Memerlukan WA gateway aktif."
             {...f.register("parentOtpEnabled")}
           />
         </CardContent>

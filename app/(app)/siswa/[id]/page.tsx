@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { AchievementDialog, DeleteAchievementButton } from "./client";
+import { FollowUpNotes } from "@/components/follow-up-notes";
 
 export const metadata = { title: "Profil Siswa" };
 
@@ -43,7 +44,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   ]);
   if (!student) notFound();
 
-  const [total, incidents, achievements, cases, hits] = await Promise.all([
+  const [total, incidents, achievements, cases, hits, notes] = await Promise.all([
     year ? studentPoints(id, year.id) : Promise.resolve(0),
     prisma.incidentStudent.findMany({
       where: { studentId: id, incident: { deletedAt: null } },
@@ -58,6 +59,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       include: { letters: { where: { deletedAt: null }, select: { id: true, letterNumber: true, type: true, status: true, meetingAt: true } } },
     }),
     year ? prisma.thresholdHit.findMany({ where: { studentId: id, academicYearId: year.id }, include: { threshold: true }, orderBy: { reachedAt: "asc" } }) : Promise.resolve([]),
+    prisma.followUpNote.findMany({ where: { studentId: id }, orderBy: { createdAt: "desc" }, take: 30, include: { author: { select: { name: true } } } }),
   ]);
 
   // grafik: poin terverifikasi per bulan pada tahun ajaran aktif
@@ -270,6 +272,20 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 {(user.role === "ADMIN" || user.role === "PKS" || a.recordedById === user.id) && <DeleteAchievementButton id={a.id} />}
               </div>
             ))}
+          </CardContent>
+        </Card>
+
+        {/* Catatan tindak lanjut */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Tindak lanjut</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <FollowUpNotes
+              canAdd={user.role !== "KEPSEK"}
+              students={[{ id: student.id, name: student.name }]}
+              notes={notes.map((n) => ({ id: n.id, note: n.note, author: n.author.name, createdAt: n.createdAt.toISOString() }))}
+            />
           </CardContent>
         </Card>
 

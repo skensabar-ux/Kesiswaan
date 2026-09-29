@@ -12,7 +12,7 @@ Tailwind CSS v4 + komponen gaya shadcn/ui · Zod · React Hook Form · ExcelJS.
 |---|---|---|
 | 1 | Setup, skema Prisma lengkap, auth & RBAC, layout, master data, import Excel | ✅ selesai |
 | 2 | Pencatatan kejadian, verifikasi, sistem poin & ambang, profil siswa | ✅ selesai |
-| 3 | Notifikasi in-app + WA gateway + antrean + portal ortu | ⏳ |
+| 3 | Notifikasi in-app + WA gateway + antrean + portal ortu | ✅ selesai |
 | 4 | Modul BK: kasus, surat panggilan PDF + QR, pendampingan, kalender | ⏳ |
 | 5 | Dashboard, laporan & export, audit log, panduan deploy lengkap | ⏳ |
 

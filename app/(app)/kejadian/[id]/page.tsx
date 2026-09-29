@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requirePageRole } from "@/lib/rbac";
+import { homeroomClassIds, requirePageRole } from "@/lib/rbac";
+import { prisma } from "@/lib/prisma";
+import { FollowUpNotes } from "@/components/follow-up-notes";
 import { findVisibleIncident } from "@/lib/incident-access";
 import { formatDateTime } from "@/lib/date";
 import { STAFF_ROLES } from "@/lib/roles";
@@ -30,7 +32,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const inc = await findVisibleIncident(user, id, {
     reporter: { select: { name: true } },
     verifiedBy: { select: { name: true } },
-    students: { include: { student: { select: { id: true, name: true, nisn: true } } }, orderBy: { student: { name: "asc" } } },
+    students: { include: { student: { select: { id: true, name: true, nisn: true, classId: true } } }, orderBy: { student: { name: "asc" } } },
     attachments: { orderBy: { createdAt: "asc" } },
     cases: { include: { case: { select: { id: true, status: true, title: true, student: { select: { name: true } } } } } },
   });
@@ -41,6 +43,18 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const canDelete = isVerifier || (inc.reporterId === user.id && inc.status === "MENUNGGU_VERIFIKASI");
   const canOpenProfile = PROFILE_ROLES.includes(user.role);
   const violations = [...new Set(inc.students.map((s) => s.violationName))];
+  const noteRoles = ["ADMIN", "PKS", "WALI_KELAS", "BK"];
+  const myClasses = user.role === "WALI_KELAS" ? await homeroomClassIds(user.id) : null;
+  const noteStudents = inc.students
+    .filter((s) => !myClasses || (s.student.classId && myClasses.includes(s.student.classId)))
+    .map((s) => ({ id: s.student.id, name: s.student.name }));
+  const notes = noteRoles.includes(user.role)
+    ? await prisma.followUpNote.findMany({
+        where: { incidentId: inc.id, ...(myClasses ? { studentId: { in: noteStudents.map((s) => s.id) } } : {}) },
+        orderBy: { createdAt: "asc" },
+        include: { author: { select: { name: true } }, student: { select: { name: true } } },
+      })
+    : [];
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -113,6 +127,28 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             </CardHeader>
             <CardContent>
               <PhotoGrid paths={inc.attachments.map((a) => a.path)} />
+            </CardContent>
+          </Card>
+        )}
+
+        {noteRoles.includes(user.role) && inc.status === "TERVERIFIKASI" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Tindak lanjut</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FollowUpNotes
+                incidentId={inc.id}
+                canAdd
+                students={noteStudents}
+                notes={notes.map((n) => ({
+                  id: n.id,
+                  note: n.note,
+                  author: n.author.name,
+                  createdAt: n.createdAt.toISOString(),
+                  studentName: inc.students.length > 1 ? n.student.name : undefined,
+                }))}
+              />
             </CardContent>
           </Card>
         )}

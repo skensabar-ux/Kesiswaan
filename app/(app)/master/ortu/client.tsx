@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { KeyRound } from "lucide-react";
+import { KeyRound, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -19,7 +19,7 @@ import { StudentPicker } from "@/components/student-picker";
 import { handleResult } from "@/components/action-helpers";
 import { parentSchema } from "@/lib/validators/master";
 import type { StudentOption } from "@/server/actions/student-search";
-import { deleteParent, resetParentPin, saveParent } from "@/server/actions/master/parent";
+import { deleteParent, resetParentPin, saveParent, sendParentPinWa } from "@/server/actions/master/parent";
 
 const formSchema = parentSchema.omit({ studentIds: true }).extend({
   students: z.array(z.object({ id: z.string(), name: z.string(), nisn: z.string(), className: z.string().nullable() })).min(1, "Pilih minimal satu siswa"),
@@ -94,6 +94,20 @@ export function ParentRowActions({ row, hasAccount }: { row: Row; hasAccount: bo
   const [pin, setPin] = useState<string | null>(null);
   return (
     <div className="flex justify-end">
+      {row.waNumber && (
+        <ConfirmAction
+          title="Kirim PIN via WhatsApp?"
+          description={`PIN baru dibuat dan dikirim ke WA ${row.name} beserta petunjuk login. PIN lama tidak berlaku lagi.`}
+          confirmLabel="Kirim"
+          variant="default"
+          action={() => sendParentPinWa(row.id)}
+          trigger={
+            <Button variant="ghost" size="icon" aria-label="Kirim PIN via WA">
+              <MessageCircle />
+            </Button>
+          }
+        />
+      )}
       <ConfirmAction
         title={hasAccount ? "Reset PIN portal?" : "Buat akun portal ortu?"}
         description={`PIN 6 digit baru untuk ${row.name} akan dibuat dan hanya ditampilkan sekali. Login memakai NISN anak + PIN.`}

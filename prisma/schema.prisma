@@ -137,6 +137,18 @@ model User {
   @@index([role])
 }
 
+/// Kode OTP login orang tua (dikirim via WA). Disimpan dalam bentuk hash.
+model OtpCode {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, expiresAt])
+}
+
 /// Pencatat percobaan login untuk rate limit (disimpan di DB karena Passenger bisa multi-proses).
 model LoginAttempt {
   key         String    @id
@@ -499,7 +511,9 @@ model SummonsLetter {
   subject          String
   bodySnapshot     String?        @db.LongText
   status           LetterStatus   @default(DRAFT)
-  verifyToken      String         @unique
+  verifyToken      String         @unique // QR verifikasi keaslian (dicetak di surat)
+  responseToken    String         @unique // tautan konfirmasi orang tua (dikirim via WA)
+  parentName       String?
   pdfPath          String?
   parentResponse   String? // HADIR | JADWAL_ULANG
   parentResponseAt DateTime?

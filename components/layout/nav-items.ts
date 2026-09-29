@@ -7,6 +7,7 @@ import {
   FileText,
   GraduationCap,
   LayoutDashboard,
+  MessageCircle,
   Scale,
   School,
   Settings,
@@ -58,6 +59,7 @@ export const NAV: NavGroup[] = [
     items: [
       { href: "/master/pengguna", label: "Pengguna", icon: UserCog, roles: ["ADMIN"] },
       { href: "/pengaturan", label: "Pengaturan", icon: Settings, roles: ["ADMIN"] },
+      { href: "/pengaturan/wa", label: "Log WhatsApp", icon: MessageCircle, roles: ["ADMIN"] },
     ],
   },
 ];
@@ -69,5 +71,6 @@ export function navFor(role: AppRole): NavGroup[] {
 export function isActive(pathname: string, href: string) {
   if (href === "/" || href === "/ortu") return pathname === href;
   if (href === "/kejadian" && pathname.startsWith("/kejadian/verifikasi")) return false;
+  if (href === "/pengaturan" && pathname.startsWith("/pengaturan/wa")) return false;
   return pathname === href || pathname.startsWith(href + "/");
 }

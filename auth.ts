@@ -86,6 +86,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             break;
           }
         }
+        // bukan PIN? coba sebagai kode OTP (sekali pakai, berlaku 5 menit)
+        if (!matched && student?.isActive) {
+          const users = student.parents.map((sp) => sp.parent.user).filter((u): u is NonNullable<typeof u> => Boolean(u?.isActive));
+          const otps = await prisma.otpCode.findMany({
+            where: { userId: { in: users.map((u) => u.id) }, usedAt: null, expiresAt: { gt: new Date() } },
+            orderBy: { createdAt: "desc" },
+            take: 10,
+          });
+          for (const otp of otps) {
+            if (await bcrypt.compare(pin, otp.codeHash)) {
+              const used = await prisma.otpCode.updateMany({ where: { id: otp.id, usedAt: null }, data: { usedAt: new Date() } });
+              if (used.count === 1) matched = users.find((u) => u.id === otp.userId) ?? null;
+              break;
+            }
+          }
+        }
         if (!matched) {
           await registerFailure(nisnKey, 5);
           await registerFailure(ipKey, 30);

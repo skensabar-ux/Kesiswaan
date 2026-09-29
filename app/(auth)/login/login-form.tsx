@@ -1,15 +1,25 @@
 "use client";
 
-import { useActionState, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useActionState, useRef, useState, useTransition } from "react";
+import { Loader2, MessageCircle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
 import { cn } from "@/lib/utils";
 import { loginParent, loginStaff } from "@/server/actions/auth";
+import { requestParentOtp } from "@/server/actions/otp";
 
-export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
+export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; otpEnabled: boolean }) {
+  const nisnRef = useRef<HTMLInputElement>(null);
+  const [otpPending, startOtp] = useTransition();
+  const askOtp = () =>
+    startOtp(async () => {
+      const res = await requestParentOtp(nisnRef.current?.value ?? "");
+      if (res.ok) toast.success(res.message ?? "Kode dikirim.");
+      else toast.error(res.error);
+    });
   const [tab, setTab] = useState<"staff" | "parent">("staff");
   const [staffState, staffAction, staffPending] = useActionState(loginStaff, null);
   const [parentState, parentAction, parentPending] = useActionState(loginParent, null);
@@ -49,11 +59,20 @@ export function LoginForm({ callbackUrl }: { callbackUrl: string }) {
         ) : (
           <form action={parentAction} className="flex flex-col gap-4">
             <FormField label="NISN Anak" htmlFor="nisn">
-              <Input id="nisn" name="nisn" inputMode="numeric" required autoFocus />
+              <Input id="nisn" name="nisn" ref={nisnRef} inputMode="numeric" required autoFocus />
             </FormField>
-            <FormField label="PIN" htmlFor="pin" hint="PIN 6 digit diberikan oleh sekolah.">
+            <FormField
+              label={otpEnabled ? "PIN atau kode OTP" : "PIN"}
+              htmlFor="pin"
+              hint={otpEnabled ? "PIN 6 digit dari sekolah, atau kode OTP yang dikirim ke WhatsApp." : "PIN 6 digit diberikan oleh sekolah."}
+            >
               <Input id="pin" name="pin" type="password" inputMode="numeric" maxLength={6} autoComplete="current-password" required />
             </FormField>
+            {otpEnabled && (
+              <Button type="button" variant="outline" onClick={askOtp} disabled={otpPending}>
+                {otpPending ? <Loader2 className="animate-spin" /> : <MessageCircle />} Kirim kode OTP ke WhatsApp
+              </Button>
+            )}
             {parentState && !parentState.ok && <p className="text-sm text-destructive">{parentState.error}</p>}
             <Button type="submit" disabled={parentPending} size="lg">
               {parentPending && <Loader2 className="animate-spin" />} Masuk
