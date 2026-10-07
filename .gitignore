@@ -12,3 +12,4 @@ deploy/
 *.log
 .DS_Store
 setup-error.log
+prisma/.schema.deploy.prisma

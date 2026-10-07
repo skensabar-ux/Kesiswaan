@@ -23,13 +23,15 @@ function runLogged(label, cmd, args) {
   process.stdout.write(out);
   if (r.status === 0) return true;
   appendFileSync(LOG, `\n===== ${new Date().toISOString()} · ${label} · ${cmd} ${args.join(" ")} · Node ${process.version} · ${process.platform}\n${out}\n`);
+  // urutan penting: penyebab spesifik dulu, baru yang umum
   const hints = [
+    [/EPERM|EBUSY|operation not permitted|resource busy|being used by another process/i, "Ada file yang sedang dikunci Windows (biasanya aplikasi masih menyala atau antivirus). Tutup semua jendela hitam lain (npm run dev / JALANKAN.bat), lalu ulangi. Bila tetap gagal, restart komputer lalu ulangi."],
+    [/binaries\.prisma\.sh|ENOTFOUND|ETIMEDOUT|ECONNRESET|getaddrinfo|fetch failed|request to https?:\/\/|certificate|self.signed/i, "Gagal mengunduh komponen Prisma dari internet. Periksa koneksi (coba jaringan lain / hotspot HP), matikan sementara VPN/proxy, lalu ulangi."],
     [/Can't reach database server|P1001|ECONNREFUSED/i, "MySQL mati atau port salah. Nyalakan MySQL di Laragon (Start All), lalu ulangi."],
     [/Access denied|P1000|Authentication failed/i, "User/password MySQL salah. Sesuaikan DATABASE_URL di file .env (mis. mysql://root:PASSWORD@localhost:3306/kesiswaan)."],
-    [/did not initialize yet|prisma generate|Cannot find module '\.prisma/i, "Prisma Client belum terbentuk. Jalankan: npx prisma generate, lalu ulangi setup."],
-    [/EPERM|EBUSY|operation not permitted|resource busy/i, "Ada file yang sedang dikunci Windows. Tutup jendela lain yang menjalankan aplikasi (npm run dev / JALANKAN.bat), lalu ulangi."],
     [/Unique constraint|P2002|Duplicate entry/i, "Data demo sudah ada sebagian dari percobaan sebelumnya. Kosongkan database: npx prisma migrate reset --force (otomatis mengisi ulang data demo)."],
     [/Unknown database|P1003/i, "Database belum ada. Jalankan: npx prisma migrate deploy, lalu ulangi."],
+    [/did not initialize yet|Cannot find module '\.prisma/i, "Prisma Client belum terbentuk. Jalankan: npx prisma generate, lalu ulangi setup."],
   ].filter(([re]) => re.test(out)).map(([, h]) => h);
   console.error(`\n\x1b[33mPetunjuk:\x1b[0m ${hints[0] ?? "lihat pesan di atas."}`);
   console.error(`Log lengkap disimpan di file ${LOG} — kirimkan isinya bila butuh bantuan.`);

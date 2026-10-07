@@ -3,7 +3,9 @@
 
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
+  // Lokal cukup "native". Engine Linux untuk hosting cPanel ditambahkan otomatis saat `npm run build`
+  // (scripts/prisma-generate-deploy.mjs), agar mencoba di laptop tidak perlu mengunduh engine server.
+  binaryTargets = ["native"]
 }
 
 datasource db {
