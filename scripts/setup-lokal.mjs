@@ -2,7 +2,7 @@
 // Hanya memakai modul bawaan Node, jadi bisa dijalankan sebelum `npm install`.
 //   node scripts/setup-lokal.mjs            → siapkan .env, install, migrasi, data demo
 //   node scripts/setup-lokal.mjs --jalankan → sekaligus menyalakan aplikasi
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import net from "node:net";
@@ -14,6 +14,27 @@ const fail = (m) => {
   process.exit(1);
 };
 const run = (cmd, args) => spawnSync(cmd, args, { stdio: "inherit", shell: process.platform === "win32" }).status === 0;
+const LOG = "setup-error.log";
+
+/** Jalankan perintah, tampilkan & simpan keluarannya. Bila gagal, tulis ke setup-error.log + beri petunjuk. */
+function runLogged(label, cmd, args) {
+  const r = spawnSync(cmd, args, { encoding: "utf8", shell: process.platform === "win32", env: process.env });
+  const out = `${r.stdout ?? ""}${r.stderr ?? ""}`;
+  process.stdout.write(out);
+  if (r.status === 0) return true;
+  appendFileSync(LOG, `\n===== ${new Date().toISOString()} · ${label} · ${cmd} ${args.join(" ")} · Node ${process.version} · ${process.platform}\n${out}\n`);
+  const hints = [
+    [/Can't reach database server|P1001|ECONNREFUSED/i, "MySQL mati atau port salah. Nyalakan MySQL di Laragon (Start All), lalu ulangi."],
+    [/Access denied|P1000|Authentication failed/i, "User/password MySQL salah. Sesuaikan DATABASE_URL di file .env (mis. mysql://root:PASSWORD@localhost:3306/kesiswaan)."],
+    [/did not initialize yet|prisma generate|Cannot find module '\.prisma/i, "Prisma Client belum terbentuk. Jalankan: npx prisma generate, lalu ulangi setup."],
+    [/EPERM|EBUSY|operation not permitted|resource busy/i, "Ada file yang sedang dikunci Windows. Tutup jendela lain yang menjalankan aplikasi (npm run dev / JALANKAN.bat), lalu ulangi."],
+    [/Unique constraint|P2002|Duplicate entry/i, "Data demo sudah ada sebagian dari percobaan sebelumnya. Kosongkan database: npx prisma migrate reset --force (otomatis mengisi ulang data demo)."],
+    [/Unknown database|P1003/i, "Database belum ada. Jalankan: npx prisma migrate deploy, lalu ulangi."],
+  ].filter(([re]) => re.test(out)).map(([, h]) => h);
+  console.error(`\n\x1b[33mPetunjuk:\x1b[0m ${hints[0] ?? "lihat pesan di atas."}`);
+  console.error(`Log lengkap disimpan di file ${LOG} — kirimkan isinya bila butuh bantuan.`);
+  return false;
+}
 
 console.log("\n=== Setup Sistem Informasi Kesiswaan (lokal) ===");
 
@@ -62,12 +83,15 @@ step("Memasang dependensi (pertama kali bisa 2–5 menit)");
 if (!run("npm", ["install", "--no-audit", "--no-fund"])) fail("npm install gagal. Periksa koneksi internet lalu ulangi.");
 ok("Dependensi terpasang");
 
-// 5. Database & data demo
+// 5. Prisma Client, database & data demo
+step("Menyiapkan Prisma Client");
+if (!runLogged("generate", "npx", ["prisma", "generate"])) fail("Gagal membuat Prisma Client.");
+ok("Prisma Client siap");
 step("Membuat database & tabel");
-if (!run("npx", ["prisma", "migrate", "deploy"])) fail("Migrasi gagal. Pastikan DATABASE_URL di file .env benar (user/password MySQL).");
+if (!runLogged("migrate", "npx", ["prisma", "migrate", "deploy"])) fail("Migrasi gagal.");
 ok("Database siap");
 step("Mengisi data demo");
-if (!run("npm", ["run", "db:seed"])) fail("Pengisian data demo gagal.");
+if (!runLogged("seed", "npm", ["run", "db:seed"])) fail("Pengisian data demo gagal.");
 
 console.log(`
 \x1b[32m=== Selesai! ===\x1b[0m

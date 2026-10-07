@@ -11,3 +11,4 @@ uploads/*
 deploy/
 *.log
 .DS_Store
+setup-error.log
