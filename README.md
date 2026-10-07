@@ -133,6 +133,9 @@ seed produksi di bagian 6.
 4. Buka **http://localhost:3000**, lalu login dengan akun demo (bagian 3).
 
 Untuk menyalakan aplikasi lagi di hari lain: nyalakan MySQL di Laragon, lalu klik dua kali **`JALANKAN.bat`**.
+Aplikasi berjalan dalam **mode produksi**, jadi semua menu terbuka cepat. Saat pertama kali, aplikasi dibuat dulu (2–5 menit).
+Setelah memperbarui kode (mis. mengekstrak ZIP versi baru), klik dua kali **`BUILD-ULANG.bat`**.
+`npm run dev` hanya untuk pengembang. Di mode itu setiap menu dikompilasi saat pertama dibuka, sehingga bisa terasa lambat.
 Dari HP di Wi-Fi yang sama, buka `http://<IP-komputer>:3000`.
 
 **Cara manual / macOS / Linux:** nyalakan MySQL, lalu jalankan `node scripts/setup-lokal.mjs --jalankan`.

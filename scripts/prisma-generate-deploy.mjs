@@ -4,7 +4,8 @@
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
-const TARGETS = ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"];
+// KESISWAAN_LOCAL=1 (dipakai JALANKAN.bat): build untuk komputer sendiri, cukup engine "native"
+const TARGETS = process.env.KESISWAAN_LOCAL === "1" ? ["native"] : ["native", "debian-openssl-3.0.x", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"];
 const src = "prisma/schema.prisma";
 const tmp = "prisma/.schema.deploy.prisma";
 const schema = readFileSync(src, "utf8");

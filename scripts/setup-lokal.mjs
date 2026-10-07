@@ -108,8 +108,8 @@ Orang tua: tab "Orang Tua", NISN 0081234514, PIN 123456
 `);
 
 if (process.argv.includes("--jalankan")) {
-  step("Menyalakan aplikasi (tutup jendela ini untuk berhenti)");
-  run("npm", ["run", "dev"]);
+  step("Menyalakan aplikasi (mode produksi — semua menu cepat)");
+  run(process.execPath, ["scripts/jalankan-lokal.mjs"]);
 } else {
-  console.log("Untuk menyalakan aplikasi: npm run dev  (atau klik dua kali JALANKAN.bat)");
+  console.log("Untuk menyalakan aplikasi: klik dua kali JALANKAN.bat  (atau: node scripts/jalankan-lokal.mjs)");
 }
