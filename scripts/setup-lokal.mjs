@@ -22,7 +22,7 @@ function runLogged(label, cmd, args) {
   const out = `${r.stdout ?? ""}${r.stderr ?? ""}`;
   process.stdout.write(out);
   if (r.status === 0) return true;
-  appendFileSync(LOG, `\n===== ${new Date().toISOString()} · ${label} · ${cmd} ${args.join(" ")} · Node ${process.version} · ${process.platform}\n${out}\n`);
+  appendFileSync(LOG, `\n===== setup v${SETUP_VERSION} · ${new Date().toISOString()} · ${label} · ${cmd} ${args.join(" ")} · Node ${process.version} · ${process.platform}\n${out}\n`);
   // urutan penting: penyebab spesifik dulu, baru yang umum
   const hints = [
     [/EPERM|EBUSY|operation not permitted|resource busy|being used by another process/i, "Ada file yang sedang dikunci Windows (biasanya aplikasi masih menyala atau antivirus). Tutup semua jendela hitam lain (npm run dev / JALANKAN.bat), lalu ulangi. Bila tetap gagal, restart komputer lalu ulangi."],
@@ -33,12 +33,16 @@ function runLogged(label, cmd, args) {
     [/Unknown database|P1003/i, "Database belum ada. Jalankan: npx prisma migrate deploy, lalu ulangi."],
     [/did not initialize yet|Cannot find module '\.prisma/i, "Prisma Client belum terbentuk. Jalankan: npx prisma generate, lalu ulangi setup."],
   ].filter(([re]) => re.test(out)).map(([, h]) => h);
-  console.error(`\n\x1b[33mPetunjuk:\x1b[0m ${hints[0] ?? "lihat pesan di atas."}`);
+  // ringkasan error tepat di atas petunjuk, agar ikut tersalin saat pengguna menyalin bagian bawah layar
+  const tail = out.split(/\r?\n/).filter((l) => l.trim() && !/^\s+at /.test(l)).slice(-12).join("\n");
+  console.error(`\n----- Pesan error (setup versi ${SETUP_VERSION}, ${label}) -----\n${tail}\n-----------------------------------------`);
+  console.error(`\x1b[33mPetunjuk:\x1b[0m ${hints[0] ?? "kirimkan pesan error di atas untuk dibantu."}`);
   console.error(`Log lengkap disimpan di file ${LOG} — kirimkan isinya bila butuh bantuan.`);
   return false;
 }
 
-console.log("\n=== Setup Sistem Informasi Kesiswaan (lokal) ===");
+const SETUP_VERSION = 3;
+console.log(`\n=== Setup Sistem Informasi Kesiswaan (lokal) — versi ${SETUP_VERSION} ===`);
 
 // 1. Versi Node
 const [maj, min] = process.versions.node.split(".").map(Number);
