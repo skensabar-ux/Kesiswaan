@@ -118,21 +118,25 @@ seed produksi di bagian 6.
 
 ## 4. Mencoba di komputer sendiri (Windows + Laragon)
 
+**Cara cepat (klik dua kali):**
 1. Pasang [Laragon](https://laragon.org/download/) (sudah berisi MySQL) dan [Node.js 20 LTS](https://nodejs.org/),
    lalu di Laragon klik **Start All**.
-2. Unduh kode (GitHub → **Code → Download ZIP**, lalu ekstrak) atau jalankan `git clone`.
-3. Laragon → **Database** → buat database `kesiswaan`.
-4. Salin `.env.example` menjadi `.env`, lalu ubah dua baris ini:
-   - `DATABASE_URL="mysql://root:@localhost:3306/kesiswaan"`
-   - `NEXTAUTH_SECRET` diisi teks acak panjang.
-5. Di Terminal Laragon, dari folder proyek:
-   ```bash
-   npm install
-   npx prisma migrate deploy
-   npm run db:seed        # data demo
-   npm run dev            # buka http://localhost:3000
-   ```
-6. Untuk mencoba dari HP di Wi-Fi yang sama, buka `http://<IP-komputer>:3000`.
+2. Unduh kode: di GitHub pilih branch `claude/new-session-pqrl4c` → **Code → Download ZIP**, lalu ekstrak
+   (mis. ke `C:\laragon\www\kesiswaan`).
+3. Klik dua kali **`SETUP-WINDOWS.bat`**. Skrip ini otomatis:
+   - membuat `.env` (database `kesiswaan`, user `root` tanpa password — bawaan Laragon);
+   - memeriksa MySQL menyala;
+   - menjalankan `npm install`;
+   - membuat database & tabel;
+   - mengisi data demo;
+   - menyalakan aplikasi.
+4. Buka **http://localhost:3000**, lalu login dengan akun demo (bagian 3).
+
+Untuk menyalakan aplikasi lagi di hari lain: nyalakan MySQL di Laragon, lalu klik dua kali **`JALANKAN.bat`**.
+Dari HP di Wi-Fi yang sama, buka `http://<IP-komputer>:3000`.
+
+**Cara manual / macOS / Linux:** nyalakan MySQL, lalu jalankan `node scripts/setup-lokal.mjs --jalankan`.
+Bila MySQL Anda memakai password, ubah `DATABASE_URL` di file `.env` lalu jalankan ulang skrip.
 
 ## 5. Konfigurasi (`.env` / Environment variables)
 
