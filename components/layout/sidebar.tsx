@@ -20,7 +20,10 @@ export function NavList({ role, onNavigate }: { role: AppRole; onNavigate?: () =
             return (
               <Link
                 key={item.href}
+                // Prefetch dimatikan: di build produksi, prefetch menu yang dibatalkan kadang membuat
+                // klik menu berikutnya tidak berpindah halaman (Next.js 15.5).
                 href={item.href}
+                prefetch={false}
                 onClick={onNavigate}
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
