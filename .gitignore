@@ -13,3 +13,4 @@ deploy/
 .DS_Store
 setup-error.log
 prisma/.schema.deploy.prisma
+build-error.log

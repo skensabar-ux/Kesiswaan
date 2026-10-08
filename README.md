@@ -135,6 +135,7 @@ seed produksi di bagian 6.
 Untuk menyalakan aplikasi lagi di hari lain: nyalakan MySQL di Laragon, lalu klik dua kali **`JALANKAN.bat`**.
 Aplikasi berjalan dalam **mode produksi**, jadi semua menu terbuka cepat. Saat pertama kali, aplikasi dibuat dulu (2–5 menit).
 Setelah memperbarui kode (mis. mengekstrak ZIP versi baru), klik dua kali **`BUILD-ULANG.bat`**.
+Aplikasi versi lama yang masih menyala dimatikan otomatis sebelum build. Bila build gagal, layar menampilkan potongan error beserta petunjuknya, dan log lengkap tersimpan di `build-error.log`.
 `npm run dev` hanya untuk pengembang. Di mode itu setiap menu dikompilasi saat pertama dibuka, sehingga bisa terasa lambat.
 Dari HP di Wi-Fi yang sama, buka `http://<IP-komputer>:3000`.
 
