@@ -2,6 +2,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import { ForbiddenError } from "@/lib/rbac";
+import { duplicateMessage } from "@/lib/duplicate-message";
 
 export type ActionResult<T = undefined> =
   | { ok: true; message?: string; data?: T }
@@ -29,8 +30,7 @@ export function toErrorResult(e: unknown): { ok: false; error: string; fieldErro
   if (e instanceof ForbiddenError || e instanceof UserError) return { ok: false, error: e.message };
   if (e instanceof Prisma.PrismaClientKnownRequestError) {
     if (e.code === "P2002") {
-      const target = (e.meta?.target as string[] | string | undefined)?.toString() ?? "";
-      return { ok: false, error: `Data duplikat${target ? ` (${target})` : ""} — nilai tersebut sudah dipakai.` };
+      return { ok: false, error: duplicateMessage(e.meta?.target) };
     }
     if (e.code === "P2003" || e.code === "P2014") {
       return { ok: false, error: "Data tidak dapat dihapus karena masih dipakai oleh data lain." };

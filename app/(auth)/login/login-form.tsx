@@ -21,6 +21,9 @@ export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; ot
       else toast.error(res.error);
     });
   const [tab, setTab] = useState<"staff" | "parent">("staff");
+  // terkendali: React mengosongkan form setelah aksi gagal, isian ini jangan ikut hilang
+  const [username, setUsername] = useState("");
+  const [nisn, setNisn] = useState("");
   const [staffState, staffAction, staffPending] = useActionState(loginStaff, null);
   const [parentState, parentAction, parentPending] = useActionState(loginParent, null);
 
@@ -46,7 +49,7 @@ export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; ot
           <form action={staffAction} className="flex flex-col gap-4">
             <input type="hidden" name="callbackUrl" value={callbackUrl} />
             <FormField label="Username / NIP" htmlFor="username">
-              <Input id="username" name="username" autoComplete="username" required autoFocus />
+              <Input id="username" name="username" autoComplete="username" required autoFocus value={username} onChange={(e) => setUsername(e.target.value)} />
             </FormField>
             <FormField label="Password" htmlFor="password">
               <Input id="password" name="password" type="password" autoComplete="current-password" required />
@@ -59,7 +62,7 @@ export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; ot
         ) : (
           <form action={parentAction} className="flex flex-col gap-4">
             <FormField label="NISN Anak" htmlFor="nisn">
-              <Input id="nisn" name="nisn" ref={nisnRef} inputMode="numeric" required autoFocus />
+              <Input id="nisn" name="nisn" ref={nisnRef} inputMode="numeric" required autoFocus value={nisn} onChange={(e) => setNisn(e.target.value)} />
             </FormField>
             <FormField
               label={otpEnabled ? "PIN atau kode OTP" : "PIN"}
