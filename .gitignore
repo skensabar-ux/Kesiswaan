@@ -14,3 +14,4 @@ deploy/
 setup-error.log
 prisma/.schema.deploy.prisma
 build-error.log
+node_modules_lama_*/

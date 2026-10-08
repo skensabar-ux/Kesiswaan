@@ -2,7 +2,7 @@
 // Build dibuat sekali (beberapa menit); berikutnya langsung menyala.
 //   node scripts/jalankan-lokal.mjs            → build bila perlu, lalu nyalakan di http://localhost:3000
 //   node scripts/jalankan-lokal.mjs --build    → paksa build ulang (setelah memperbarui kode)
-import { appendFileSync, existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import net from "node:net";
 import { createHash } from "node:crypto";
 import { spawn, spawnSync } from "node:child_process";
@@ -112,6 +112,7 @@ const HINTS = [
   [/ENOSPC|no space left/i, "Ruang penyimpanan (disk) penuh. Kosongkan sebagian ruang lalu ulangi."],
   [/ENOTFOUND|ETIMEDOUT|ECONNRESET|EAI_AGAIN|network/i, "Koneksi internet bermasalah saat mengunduh paket. Periksa internet lalu ulangi."],
   [/Can't reach database|P1001|ECONNREFUSED.*3306/i, "MySQL belum menyala. Buka Laragon, klik Start All, lalu ulangi."],
+  [/Cannot find module|MODULE_NOT_FOUND/i, "Ada paket yang hilang dan pemasangan ulang otomatis belum berhasil. Pastikan internet menyala, hapus folder node_modules, lalu jalankan lagi JALANKAN.bat."],
   [/Type error|Failed to compile|Module not found/i, "Kode aplikasi gagal dikompilasi. Pastikan ZIP diekstrak lengkap (pilih Replace / Ganti semua), lalu ulangi."],
 ];
 
@@ -150,14 +151,57 @@ function explain(label, out, fallback) {
   fail(`${label} gagal.`);
 }
 
+const MISSING = /Cannot find module|MODULE_NOT_FOUND|Module not found/i;
+let repaired = false;
+
+/** node_modules rusak/tidak lengkap (mis. install sebelumnya terputus): hapus lalu pasang ulang persis sesuai package-lock. */
+async function repairModules() {
+  repaired = true;
+  console.log("\n\x1b[33m▶ Ada paket yang hilang atau rusak. Memasang ulang semua paket (3–5 menit, butuh internet)…\x1b[0m");
+  if (existsSync("node_modules")) {
+    // ganti nama dulu agar penghapusan tidak terganjal file yang sedang dipakai
+    const trash = `node_modules_lama_${Date.now()}`;
+    try {
+      renameSync("node_modules", trash);
+    } catch {
+      /* tetap coba hapus langsung */
+    }
+    for (const dir of [trash, "node_modules"]) {
+      try {
+        rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+      } catch {
+        /* sisa folder lama tidak menghalangi pemasangan baru */
+      }
+    }
+  }
+  const r = await runLogged("Memasang ulang paket…", "npm", ["ci", "--no-audit", "--no-fund"]);
+  if (!r.ok) explain("Pemasangan ulang paket", r.out, "Periksa koneksi internet lalu ulangi.");
+}
+
+/** Jalankan langkah; bila gagal karena paket hilang, perbaiki node_modules sekali lalu ulangi. */
+async function stepWithRepair(label, cmd, args, extraEnv) {
+  let r = await runLogged(label, cmd, args, extraEnv);
+  if (!r.ok && MISSING.test(r.out) && !repaired) {
+    await repairModules();
+    r = await runLogged(label, cmd, args, extraEnv);
+  }
+  return r;
+}
+
 if (needBuild) {
   writeFileSync(LOG, "");
   // kode baru bisa membawa paket & perubahan database baru
   let r = await runLogged("Memeriksa paket…", "npm", ["install", "--no-audit", "--no-fund"]);
-  if (!r.ok) explain("Pemasangan paket", r.out, "Periksa koneksi internet lalu ulangi.");
-  r = await runLogged("Memperbarui struktur database…", "npx", ["prisma", "migrate", "deploy"]);
+  if (!r.ok) {
+    if (!MISSING.test(r.out) && !/EPERM|EBUSY|ENOTEMPTY/i.test(r.out)) explain("Pemasangan paket", r.out, "Periksa koneksi internet lalu ulangi.");
+    await repairModules();
+  }
+  // pastikan paket benar-benar lengkap (npm kadang melaporkan "up to date" padahal ada file yang hilang)
+  r = await stepWithRepair("Memeriksa kelengkapan paket…", "npx", ["prisma", "--version"]);
+  if (!r.ok) explain("Pemeriksaan paket", r.out, "Hapus folder node_modules lalu jalankan lagi JALANKAN.bat.");
+  r = await stepWithRepair("Memperbarui struktur database…", "npx", ["prisma", "migrate", "deploy"]);
   if (!r.ok) explain("Pembaruan database", r.out, "Pastikan MySQL di Laragon menyala lalu ulangi.");
-  r = await runLogged("Membuat versi produksi (sekitar 2–5 menit)…", "npm", ["run", "build"], { KESISWAAN_LOCAL: "1" });
+  r = await stepWithRepair("Membuat versi produksi (sekitar 2–5 menit)…", "npm", ["run", "build"], { KESISWAAN_LOCAL: "1" });
   if (!r.ok && /EPERM|EBUSY|operation not permitted|resource busy or locked/i.test(r.out)) {
     // sering karena antivirus memindai file baru: tunggu sebentar lalu coba sekali lagi
     console.log("\n\x1b[33m▶ Ada file yang terkunci, mencoba lagi dalam 5 detik…\x1b[0m");
