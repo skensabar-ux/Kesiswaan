@@ -2,7 +2,7 @@
 // Hanya memakai modul bawaan Node, jadi bisa dijalankan sebelum `npm install`.
 //   node scripts/setup-lokal.mjs            → siapkan .env, install, migrasi, data demo
 //   node scripts/setup-lokal.mjs --jalankan → sekaligus menyalakan aplikasi
-import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import net from "node:net";
@@ -31,6 +31,7 @@ function runLogged(label, cmd, args) {
     [/Access denied|P1000|Authentication failed/i, "User/password MySQL salah. Sesuaikan DATABASE_URL di file .env (mis. mysql://root:PASSWORD@localhost:3306/kesiswaan)."],
     [/Unique constraint|P2002|Duplicate entry/i, "Data demo sudah ada sebagian dari percobaan sebelumnya. Kosongkan database: npx prisma migrate reset --force (otomatis mengisi ulang data demo)."],
     [/Unknown database|P1003/i, "Database belum ada. Jalankan: npx prisma migrate deploy, lalu ulangi."],
+    [/Cannot find module '(?!\.prisma)/i, "Ada paket yang hilang meski sudah dipasang ulang; kemungkinan dihapus antivirus. Tambahkan folder aplikasi ke pengecualian Windows Defender (Keamanan Windows → Perlindungan virus & ancaman → Kelola pengaturan → Pengecualian), hapus folder node_modules, lalu ulangi."],
     [/did not initialize yet|Cannot find module '\.prisma/i, "Prisma Client belum terbentuk. Jalankan: npx prisma generate, lalu ulangi setup."],
   ].filter(([re]) => re.test(out)).map(([, h]) => h);
   // ringkasan error tepat di atas petunjuk, agar ikut tersalin saat pengguna menyalin bagian bawah layar
@@ -41,7 +42,7 @@ function runLogged(label, cmd, args) {
   return false;
 }
 
-const SETUP_VERSION = 3;
+const SETUP_VERSION = 4;
 console.log(`\n=== Setup Sistem Informasi Kesiswaan (lokal) — versi ${SETUP_VERSION} ===`);
 
 // 1. Versi Node
@@ -86,7 +87,34 @@ ok(`MySQL aktif di ${hostname}:${port}`);
 
 // 4. Dependensi
 step("Memasang dependensi (pertama kali bisa 2–5 menit)");
-if (!run("npm", ["install", "--no-audit", "--no-fund"])) fail("npm install gagal. Periksa koneksi internet lalu ulangi.");
+// npm bisa melaporkan "up to date" padahal ada paket yang tidak lengkap (mis. sisa pemasangan yang terputus)
+const packagesOk = () => {
+  const r = spawnSync("npx", ["prisma", "--version"], { encoding: "utf8", shell: process.platform === "win32" });
+  return r.status === 0;
+};
+function reinstallPackages() {
+  step("Ada paket yang hilang atau rusak. Memasang ulang semua paket (3–5 menit, butuh internet)");
+  if (existsSync("node_modules")) {
+    const trash = `node_modules_lama_${Date.now()}`;
+    try {
+      renameSync("node_modules", trash); // ganti nama dulu agar tidak terganjal file yang sedang dipakai
+    } catch {
+      /* tetap coba hapus langsung */
+    }
+    for (const dir of [trash, "node_modules"]) {
+      try {
+        rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 500 });
+      } catch {
+        /* sisa folder lama tidak menghalangi pemasangan baru */
+      }
+    }
+  }
+  if (!runLogged("pasang ulang paket", "npm", ["ci", "--no-audit", "--no-fund"])) fail("Pemasangan ulang paket gagal.");
+}
+if (!run("npm", ["install", "--no-audit", "--no-fund"]) || !packagesOk()) {
+  reinstallPackages();
+  if (!runLogged("cek paket", "npx", ["prisma", "--version"])) fail("Paket belum lengkap.");
+}
 ok("Dependensi terpasang");
 
 // 5. Prisma Client, database & data demo

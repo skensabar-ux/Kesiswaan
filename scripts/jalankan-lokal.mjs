@@ -112,7 +112,7 @@ const HINTS = [
   [/ENOSPC|no space left/i, "Ruang penyimpanan (disk) penuh. Kosongkan sebagian ruang lalu ulangi."],
   [/ENOTFOUND|ETIMEDOUT|ECONNRESET|EAI_AGAIN|network/i, "Koneksi internet bermasalah saat mengunduh paket. Periksa internet lalu ulangi."],
   [/Can't reach database|P1001|ECONNREFUSED.*3306/i, "MySQL belum menyala. Buka Laragon, klik Start All, lalu ulangi."],
-  [/Cannot find module|MODULE_NOT_FOUND/i, "Ada paket yang hilang dan pemasangan ulang otomatis belum berhasil. Pastikan internet menyala, hapus folder node_modules, lalu jalankan lagi JALANKAN.bat."],
+  [/Cannot find module|MODULE_NOT_FOUND/i, "Ada paket yang hilang meski sudah dipasang ulang; kemungkinan dihapus antivirus. Tambahkan folder aplikasi ke pengecualian Windows Defender (Keamanan Windows → Perlindungan virus & ancaman → Kelola pengaturan → Pengecualian), hapus folder node_modules, lalu jalankan lagi JALANKAN.bat."],
   [/Type error|Failed to compile|Module not found/i, "Kode aplikasi gagal dikompilasi. Pastikan ZIP diekstrak lengkap (pilih Replace / Ganti semua), lalu ulangi."],
 ];
 
