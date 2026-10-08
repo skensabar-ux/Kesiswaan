@@ -79,7 +79,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <TH className="hidden md:table-cell">No. WA</TH>
                   <TH>Anak</TH>
                   <TH className="hidden md:table-cell">Portal</TH>
-                  <TH className="w-32" />
+                  <TH className="w-12 sm:w-32" />
                 </TR>
               </THead>
               <TBody>

@@ -69,8 +69,8 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <TH className="hidden sm:table-cell">NIP</TH>
                   <TH className="hidden md:table-cell">No. HP/WA</TH>
                   <TH className="hidden md:table-cell">Wali Kelas</TH>
-                  <TH>Akun</TH>
-                  <TH className="w-24" />
+                  <TH className="hidden sm:table-cell">Akun</TH>
+                  <TH className="w-12 sm:w-24" />
                 </TR>
               </THead>
               <TBody>
@@ -78,12 +78,13 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <TR key={r.id}>
                     <TD>
                       <p className="font-medium">{r.name}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground sm:hidden">{r.user ? ROLE_LABEL[r.user.role] : "Belum punya akun"}</p>
                       {!r.isActive && <Badge variant="secondary">Nonaktif</Badge>}
                     </TD>
                     <TD className="hidden sm:table-cell font-mono text-xs">{r.nip ?? "-"}</TD>
                     <TD className="hidden md:table-cell">{displayPhone(r.phone)}</TD>
                     <TD className="hidden md:table-cell">{r.homeroomClasses.map((c) => c.name).join(", ") || "-"}</TD>
-                    <TD>{r.user ? <Badge variant="outline">{ROLE_LABEL[r.user.role]}</Badge> : <span className="text-xs text-muted-foreground">Belum ada</span>}</TD>
+                    <TD className="hidden sm:table-cell">{r.user ? <Badge variant="outline">{ROLE_LABEL[r.user.role]}</Badge> : <span className="text-xs text-muted-foreground">Belum ada</span>}</TD>
                     <TD>
                       <TeacherRowActions row={{ id: r.id, nip: r.nip ?? "", name: r.name, phone: r.phone ?? "", isActive: r.isActive }} />
                     </TD>

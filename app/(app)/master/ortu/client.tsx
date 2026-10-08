@@ -20,6 +20,7 @@ import { handleResult } from "@/components/action-helpers";
 import { parentSchema } from "@/lib/validators/master";
 import type { StudentOption } from "@/server/actions/student-search";
 import { deleteParent, resetParentPin, saveParent, sendParentPinWa } from "@/server/actions/master/parent";
+import { RowActionGroup } from "@/components/row-action-group";
 
 const formSchema = parentSchema.omit({ studentIds: true }).extend({
   students: z.array(z.object({ id: z.string(), name: z.string(), nisn: z.string(), className: z.string().nullable() })).min(1, "Pilih minimal satu siswa"),
@@ -93,7 +94,7 @@ export function ParentRowActions({ row, hasAccount }: { row: Row; hasAccount: bo
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState<string | null>(null);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       {row.waNumber && (
         <ConfirmAction
           title="Kirim PIN via WhatsApp?"
@@ -141,6 +142,6 @@ export function ParentRowActions({ row, hasAccount }: { row: Row; hasAccount: bo
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </RowActionGroup>
   );
 }

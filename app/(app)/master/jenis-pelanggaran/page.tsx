@@ -69,7 +69,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                 <TH>Kategori</TH>
                 <TH className="text-right">Poin</TH>
                 <TH className="hidden md:table-cell text-right">Dipakai</TH>
-                <TH className="w-24" />
+                <TH className="w-12 sm:w-24" />
               </TR>
             </THead>
             <TBody>

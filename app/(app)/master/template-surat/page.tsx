@@ -43,7 +43,7 @@ export default async function Page() {
                 <TH className="hidden md:table-cell">Jenis</TH>
                 <TH className="hidden md:table-cell">Diperbarui</TH>
                 <TH className="hidden sm:table-cell">Dipakai</TH>
-                <TH className="w-24" />
+                <TH className="w-12 sm:w-24" />
               </TR>
             </THead>
             <TBody>

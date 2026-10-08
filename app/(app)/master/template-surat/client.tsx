@@ -15,6 +15,7 @@ import { handleResult } from "@/components/action-helpers";
 import { LETTER_PLACEHOLDERS, LETTER_TYPE_LABEL } from "@/lib/constants";
 import { letterTemplateSchema } from "@/lib/validators/master";
 import { deleteLetterTemplate, saveLetterTemplate } from "@/server/actions/master/letter-template";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof letterTemplateSchema>;
 type Row = V & { id: string };
@@ -94,10 +95,10 @@ export function LetterTemplateDialog({
 export function LetterTemplateRowActions({ row }: { row: Row }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <LetterTemplateDialog initial={row} open={open} onOpenChange={setOpen} />
       <DeleteButton name={row.name} action={() => deleteLetterTemplate(row.id)} />
-    </div>
+    </RowActionGroup>
   );
 }

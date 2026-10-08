@@ -15,6 +15,7 @@ import { handleResult } from "@/components/action-helpers";
 import { ROLE_LABEL } from "@/lib/roles";
 import { thresholdSchema } from "@/lib/validators/master";
 import { deleteThreshold, saveThreshold } from "@/server/actions/master/threshold";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof thresholdSchema>;
 type Row = V & { id: string };
@@ -109,10 +110,10 @@ export function ThresholdDialog({
 export function ThresholdRowActions({ row, templates }: { row: Row; templates: Tpl[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <ThresholdDialog initial={row} templates={templates} open={open} onOpenChange={setOpen} />
       <DeleteButton name={`Ambang ${row.minPoints} poin`} action={() => deleteThreshold(row.id)} />
-    </div>
+    </RowActionGroup>
   );
 }

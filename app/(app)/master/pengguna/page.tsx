@@ -67,9 +67,9 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                 <TR>
                   <TH>Nama</TH>
                   <TH className="hidden sm:table-cell">Username</TH>
-                  <TH>Role</TH>
+                  <TH className="hidden sm:table-cell">Role</TH>
                   <TH className="hidden md:table-cell">Login terakhir</TH>
-                  <TH className="w-32" />
+                  <TH className="w-12 sm:w-32" />
                 </TR>
               </THead>
               <TBody>
@@ -78,10 +78,13 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                     <TD>
                       <p className="font-medium">{r.name}</p>
                       <p className="font-mono text-xs text-muted-foreground sm:hidden">{r.username}</p>
+                      <Badge variant="outline" className="mt-1 sm:hidden">
+                        {ROLE_LABEL[r.role]}
+                      </Badge>
                       {!r.isActive && <Badge variant="secondary">Nonaktif</Badge>}
                     </TD>
                     <TD className="hidden sm:table-cell font-mono text-xs">{r.username}</TD>
-                    <TD>
+                    <TD className="hidden sm:table-cell">
                       <Badge variant="outline">{ROLE_LABEL[r.role]}</Badge>
                     </TD>
                     <TD className="hidden md:table-cell text-xs text-muted-foreground">{r.lastLoginAt ? formatDateTime(r.lastLoginAt) : "Belum pernah"}</TD>

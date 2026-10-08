@@ -18,6 +18,7 @@ import { handleResult } from "@/components/action-helpers";
 import { ROLE_LABEL } from "@/lib/roles";
 import { STAFF_ROLE_VALUES, userSchema } from "@/lib/validators/master";
 import { resetUserPassword, saveUser } from "@/server/actions/master/user";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof userSchema>;
 type Row = V & { id: string };
@@ -137,7 +138,7 @@ export function UserRowActions({ row, teachers, isSelf }: { row: Row; teachers: 
   const [open, setOpen] = useState(false);
   const [pwd, setPwd] = useState<string | null>(null);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       {!isSelf && (
         <ConfirmAction
           title="Reset password?"
@@ -156,6 +157,6 @@ export function UserRowActions({ row, teachers, isSelf }: { row: Row; teachers: 
       <EditButton onClick={() => setOpen(true)} />
       <UserDialog initial={row} teachers={teachers} open={open} onOpenChange={setOpen} />
       <CredentialDialog value={pwd} username={row.username} onClose={() => setPwd(null)} />
-    </div>
+    </RowActionGroup>
   );
 }

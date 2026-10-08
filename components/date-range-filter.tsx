@@ -16,10 +16,10 @@ export function DateRangeFilter({ fromParam = "dari", toParam = "sampai" }: { fr
     router.replace(`${pathname}?${next.toString()}`);
   };
   return (
-    <div className="flex items-center gap-2">
-      <Input type="date" aria-label="Dari tanggal" className="lg:w-40" value={params.get(fromParam) ?? ""} onChange={(e) => set(fromParam, e.target.value)} />
+    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 lg:flex">
+      <Input type="date" aria-label="Dari tanggal" className="min-w-0 px-2.5 lg:w-40 lg:px-3" value={params.get(fromParam) ?? ""} onChange={(e) => set(fromParam, e.target.value)} />
       <span className="text-sm text-muted-foreground">s.d.</span>
-      <Input type="date" aria-label="Sampai tanggal" className="lg:w-40" value={params.get(toParam) ?? ""} onChange={(e) => set(toParam, e.target.value)} />
+      <Input type="date" aria-label="Sampai tanggal" className="min-w-0 px-2.5 lg:w-40 lg:px-3" value={params.get(toParam) ?? ""} onChange={(e) => set(toParam, e.target.value)} />
     </div>
   );
 }

@@ -91,7 +91,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <TH className="hidden md:table-cell">JK</TH>
                   <TH>Kelas</TH>
                   <TH className="hidden md:table-cell">Ortu</TH>
-                  <TH className="w-24" />
+                  <TH className="w-12 sm:w-24" />
                 </TR>
               </THead>
               <TBody>

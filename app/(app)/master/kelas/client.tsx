@@ -13,6 +13,7 @@ import { DeleteButton, EditButton } from "@/components/row-actions";
 import { handleResult } from "@/components/action-helpers";
 import { classSchema } from "@/lib/validators/master";
 import { deleteClass, saveClass } from "@/server/actions/master/class";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof classSchema>;
 type Row = V & { id: string };
@@ -92,10 +93,10 @@ export function ClassDialog({
 export function ClassRowActions({ row, options }: { row: Row; options: Options }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <ClassDialog initial={row} options={options} open={open} onOpenChange={setOpen} />
       <DeleteButton name={row.name} action={() => deleteClass(row.id)} />
-    </div>
+    </RowActionGroup>
   );
 }

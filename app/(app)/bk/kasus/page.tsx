@@ -151,16 +151,16 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
     <>
       {header}
       {filters}
-      <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-2 md:px-0 xl:grid-cols-4">
+      <div className="stagger flex flex-col gap-3 md:grid md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => {
           const items = open.filter((c) => c.status === col.status);
           return (
-            <div key={col.status} className="flex w-[82vw] shrink-0 snap-start flex-col gap-2 rounded-xl bg-muted/50 p-2.5 md:w-auto">
+            <div key={col.status} className="flex flex-col gap-2 rounded-xl bg-muted/50 p-2.5">
               <div className="flex items-center justify-between px-1">
                 <p className="text-sm font-semibold">{col.label}</p>
                 <span className="rounded-full bg-background px-2 text-xs font-medium tabular-nums">{items.length}</span>
               </div>
-              {items.length === 0 && <p className="px-1 py-4 text-center text-xs text-muted-foreground">Kosong</p>}
+              {items.length === 0 && <p className="hidden px-1 py-4 text-center text-xs text-muted-foreground md:block">Kosong</p>}
               {items.map((c) => (
                 <Link key={c.id} href={`/bk/kasus/${c.id}`}>
                   <Card className={cn("p-3 transition-colors hover:border-primary/40", c.priority === "TINGGI" && "border-l-4 border-l-destructive")}>

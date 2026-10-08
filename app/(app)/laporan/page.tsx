@@ -54,7 +54,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
         <FilterSelect param="tingkat" placeholder="Semua tingkat" className="w-full lg:w-36" options={[10, 11, 12, 13].map((g) => ({ value: String(g), label: `Tingkat ${g}` }))} />
       </div>
 
-      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="stagger mb-4 grid grid-cols-2 gap-3 lg:grid-cols-5 [&>:last-child:nth-child(odd)]:col-span-2 lg:[&>:last-child:nth-child(odd)]:col-span-1">
         {[
           ["Kejadian", r.totals.incidents],
           ["Pelanggaran", r.totals.violations],
@@ -164,7 +164,7 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                   <TH className="w-10">#</TH>
                   <TH>Nama</TH>
                   <TH className="hidden sm:table-cell">NISN</TH>
-                  <TH>Kelas</TH>
+                  <TH className="hidden sm:table-cell">Kelas</TH>
                   <TH className="text-right">Pelanggaran</TH>
                   <TH className="hidden sm:table-cell text-right">Berat</TH>
                   <TH className="text-right">Poin</TH>
@@ -174,9 +174,12 @@ export default async function Page({ searchParams }: { searchParams: SP }) {
                 {r.students.slice(0, 100).map((s, i) => (
                   <TR key={s.nisn}>
                     <TD className="text-muted-foreground">{i + 1}</TD>
-                    <TD className="font-medium">{s.name}</TD>
+                    <TD>
+                      <p className="font-medium">{s.name}</p>
+                      <p className="text-xs text-muted-foreground sm:hidden">{s.className}</p>
+                    </TD>
                     <TD className="hidden sm:table-cell font-mono text-xs">{s.nisn}</TD>
-                    <TD>{s.className}</TD>
+                    <TD className="hidden sm:table-cell">{s.className}</TD>
                     <TD className="text-right tabular-nums">{s.count}</TD>
                     <TD className="hidden sm:table-cell text-right tabular-nums">{s.berat}</TD>
                     <TD className="text-right font-semibold tabular-nums">{s.points}</TD>

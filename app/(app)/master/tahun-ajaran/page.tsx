@@ -46,7 +46,7 @@ export default async function Page() {
                 <TH className="hidden md:table-cell">Periode</TH>
                 <TH>Kelas</TH>
                 <TH>Status</TH>
-                <TH className="w-24" />
+                <TH className="w-12 sm:w-24" />
               </TR>
             </THead>
             <TBody>

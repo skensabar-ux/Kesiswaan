@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export type BarDatum = { label: string; value: number; fullLabel?: string; extra?: string };
@@ -23,6 +23,17 @@ export function SimpleBarChart({
   ariaLabel: string;
 }) {
   const gid = `bar-${useId().replace(/:/g, "")}`;
+  // layar HP: kolom label lebih sempit & label panjang dipotong (nama lengkap tetap di tooltip)
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const on = () => setNarrow(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  const maxChars = narrow ? 14 : 24;
+  const short = (v: string) => (v.length > maxChars ? `${v.slice(0, maxChars - 1).trimEnd()}…` : v);
   const h = height ?? (horizontal ? Math.max(160, data.length * 30 + 24) : 220);
   const tick = { fill: "var(--muted-foreground)", fontSize: 11 };
   return (
@@ -39,11 +50,24 @@ export function SimpleBarChart({
           {horizontal ? (
             <>
               <XAxis type="number" allowDecimals={false} tickLine={false} axisLine={false} tick={tick} />
-              <YAxis type="category" dataKey="label" tickLine={false} axisLine={false} tick={tick} width={150} interval={0} />
+              <YAxis
+                type="category"
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                width={narrow ? 112 : 160}
+                interval={0}
+                // satu baris tanpa pemenggalan kata (label recharts bawaan membungkus & bisa terpotong)
+                tick={(t) => (
+                  <text x={t.x} y={t.y} dy={4} textAnchor="end" fill={tick.fill} fontSize={tick.fontSize}>
+                    {short(String(t.payload?.value ?? ""))}
+                  </text>
+                )}
+              />
             </>
           ) : (
             <>
-              <XAxis dataKey="label" tickLine={false} axisLine={false} tick={tick} interval={0} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} tick={tick} interval={narrow && data.some((d) => d.label.length > 6) ? "preserveStartEnd" : 0} tickFormatter={short} />
               <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={tick} width={32} />
             </>
           )}

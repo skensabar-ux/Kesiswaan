@@ -14,6 +14,7 @@ import { DeleteButton, EditButton } from "@/components/row-actions";
 import { handleResult } from "@/components/action-helpers";
 import { violationTypeSchema } from "@/lib/validators/master";
 import { deleteViolationType, saveViolationType } from "@/server/actions/master/violation-type";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof violationTypeSchema>;
 type Row = V & { id: string };
@@ -83,10 +84,10 @@ export function ViolationTypeDialog({
 export function ViolationTypeRowActions({ row, categories }: { row: Row; categories: Cat[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <ViolationTypeDialog initial={row} categories={categories} open={open} onOpenChange={setOpen} />
       <DeleteButton name={row.name} action={() => deleteViolationType(row.id)} />
-    </div>
+    </RowActionGroup>
   );
 }

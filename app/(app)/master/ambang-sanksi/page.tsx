@@ -48,7 +48,7 @@ export default async function Page() {
                 <TH>Tindakan</TH>
                 <TH className="hidden md:table-cell">Template</TH>
                 <TH className="hidden sm:table-cell">Otomatis</TH>
-                <TH className="w-24" />
+                <TH className="w-12 sm:w-24" />
               </TR>
             </THead>
             <TBody>

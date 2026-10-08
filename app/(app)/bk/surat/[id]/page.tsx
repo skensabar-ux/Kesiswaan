@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, FileText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requirePageRole } from "@/lib/rbac";
 import { formatDateTime, toDateInput, toTimeInput } from "@/lib/date";
@@ -115,6 +115,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               </p>
             )}
             <div className="mt-2 flex flex-wrap gap-2">
+              {/* browser HP umumnya tidak bisa menampilkan PDF di dalam halaman: buka di penampil PDF */}
+              <Button size="sm" className="md:hidden" asChild>
+                <a href={`/api/surat/${l.id}/pdf`} target="_blank" rel="noopener">
+                  <FileText /> Lihat PDF
+                </a>
+              </Button>
               <Button variant="outline" size="sm" asChild>
                 <a href={`/api/surat/${l.id}/pdf?unduh=1`}>
                   <Download /> Unduh PDF
@@ -131,7 +137,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             )}
           </CardContent>
         </Card>
-        <Card className="overflow-hidden lg:col-span-2">
+        <Card className="hidden overflow-hidden md:block lg:col-span-2">
           <iframe title="Pratinjau surat" src={`/api/surat/${l.id}/pdf`} className="h-[75vh] w-full bg-muted" />
         </Card>
       </div>

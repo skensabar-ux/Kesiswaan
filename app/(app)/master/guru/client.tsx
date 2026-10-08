@@ -12,6 +12,7 @@ import { DeleteButton, EditButton } from "@/components/row-actions";
 import { handleResult } from "@/components/action-helpers";
 import { teacherSchema } from "@/lib/validators/master";
 import { deleteTeacher, saveTeacher } from "@/server/actions/master/teacher";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof teacherSchema>;
 type Row = V & { id: string };
@@ -62,10 +63,10 @@ export function TeacherDialog({
 export function TeacherRowActions({ row }: { row: Row }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <TeacherDialog initial={row} open={open} onOpenChange={setOpen} />
       <DeleteButton name={row.name} action={() => deleteTeacher(row.id)} />
-    </div>
+    </RowActionGroup>
   );
 }

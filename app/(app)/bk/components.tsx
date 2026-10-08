@@ -146,18 +146,20 @@ export function CaseActions({
       )}
       {canManage && (
         <>
-          <Select
-            aria-label="Ubah status"
-            className="h-10 w-52"
-            value={status}
-            disabled={pending}
-            onChange={(e) => start(async () => { if (handleResult(await setCaseStatus(caseId, e.target.value as "BARU"))) refresh(); })}
-          >
-            <option value="BARU">Baru</option>
-            <option value="DIJADWALKAN">Dijadwalkan</option>
-            <option value="PROSES_PENDAMPINGAN">Proses pendampingan</option>
-            <option value="MENUNGGU_EVALUASI">Menunggu evaluasi</option>
-          </Select>
+          <div className="w-full sm:w-auto">
+            <Select
+              aria-label="Ubah status"
+              className="h-10 w-full sm:w-52"
+              value={status}
+              disabled={pending}
+              onChange={(e) => start(async () => { if (handleResult(await setCaseStatus(caseId, e.target.value as "BARU"))) refresh(); })}
+            >
+              <option value="BARU">Baru</option>
+              <option value="DIJADWALKAN">Dijadwalkan</option>
+              <option value="PROSES_PENDAMPINGAN">Proses pendampingan</option>
+              <option value="MENUNGGU_EVALUASI">Menunggu evaluasi</option>
+            </Select>
+          </div>
           <ConfirmAction
             title="Tutup kasus"
             description="Tuliskan ringkasan evaluasi (min. 20 karakter): perkembangan siswa, kesepakatan, dan rekomendasi."

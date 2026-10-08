@@ -13,6 +13,7 @@ import { DeleteButton, EditButton } from "@/components/row-actions";
 import { handleResult } from "@/components/action-helpers";
 import { academicYearSchema } from "@/lib/validators/master";
 import { deleteAcademicYear, saveAcademicYear } from "@/server/actions/master/academic-year";
+import { RowActionGroup } from "@/components/row-action-group";
 
 type V = z.infer<typeof academicYearSchema>;
 type Row = V & { id: string };
@@ -84,10 +85,10 @@ export function AcademicYearDialog({
 export function AcademicYearRowActions({ row }: { row: Row }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <RowActionGroup>
       <EditButton onClick={() => setOpen(true)} />
       <AcademicYearDialog initial={row} open={open} onOpenChange={setOpen} />
       {!row.isActive && <DeleteButton name={row.name} action={() => deleteAcademicYear(row.id)} />}
-    </div>
+    </RowActionGroup>
   );
 }
