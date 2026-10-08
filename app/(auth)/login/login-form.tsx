@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { loginParent, loginStaff } from "@/server/actions/auth";
 import { requestParentOtp } from "@/server/actions/otp";
 
-export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; otpEnabled: boolean }) {
+export function LoginForm({ callbackUrl, otpEnabled, defaultTab = "staff" }: { callbackUrl: string; otpEnabled: boolean; defaultTab?: "staff" | "parent" }) {
   const nisnRef = useRef<HTMLInputElement>(null);
   const [otpPending, startOtp] = useTransition();
   const askOtp = () =>
@@ -20,7 +20,7 @@ export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; ot
       if (res.ok) toast.success(res.message ?? "Kode dikirim.");
       else toast.error(res.error);
     });
-  const [tab, setTab] = useState<"staff" | "parent">("staff");
+  const [tab, setTab] = useState<"staff" | "parent">(defaultTab);
   // terkendali: React mengosongkan form setelah aksi gagal, isian ini jangan ikut hilang
   const [username, setUsername] = useState("");
   const [nisn, setNisn] = useState("");

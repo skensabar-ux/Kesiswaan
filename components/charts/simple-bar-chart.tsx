@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 export type BarDatum = { label: string; value: number; fullLabel?: string; extra?: string };
@@ -21,12 +22,19 @@ export function SimpleBarChart({
   height?: number;
   ariaLabel: string;
 }) {
+  const gid = `bar-${useId().replace(/:/g, "")}`;
   const h = height ?? (horizontal ? Math.max(160, data.length * 30 + 24) : 220);
   const tick = { fill: "var(--muted-foreground)", fontSize: 11 };
   return (
     <div style={{ height: h }} className="w-full" role="img" aria-label={ariaLabel}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout={horizontal ? "vertical" : "horizontal"} margin={{ top: 4, right: 12, bottom: 0, left: 0 }} barCategoryGap="28%">
+          <defs>
+            <linearGradient id={gid} x1="0" y1={horizontal ? "0" : "1"} x2={horizontal ? "1" : "0"} y2="0">
+              <stop offset="0%" style={{ stopColor: "var(--primary)" }} />
+              <stop offset="100%" style={{ stopColor: "var(--brand-2)" }} />
+            </linearGradient>
+          </defs>
           <CartesianGrid horizontal={!horizontal} vertical={horizontal} stroke="var(--border)" />
           {horizontal ? (
             <>
@@ -55,7 +63,7 @@ export function SimpleBarChart({
               );
             }}
           />
-          <Bar dataKey="value" fill="var(--primary)" radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 18 : 28} />
+          <Bar dataKey="value" fill={`url(#${gid})`} animationDuration={900} animationEasing="ease-out" radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]} maxBarSize={horizontal ? 18 : 28} />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -25,7 +25,7 @@ import { LETTER_TYPE_LABEL } from "@/lib/constants";
 import { APPROVAL_REQUIRED } from "@/lib/letter";
 import { SESSION_TYPE_LABEL } from "@/lib/validators/bk";
 import { StatTile } from "@/components/stat-tile";
-import { SimpleBarChart } from "@/components/charts/simple-bar-chart";
+import { LazySimpleBarChart as SimpleBarChart } from "@/components/charts/lazy";
 import { CaseStatusBadge, IncidentStatusBadge, PointsBadge } from "@/components/status-badges";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -113,15 +113,15 @@ export async function PksDashboard({ user }: { user: SessionUser }) {
   ]);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile accent="blue" label="Kejadian hari ini" value={counts.today} icon={ClipboardList} href="/kejadian" />
-        <StatTile accent="violet" label="Kejadian minggu ini" value={counts.week} icon={CalendarRange} href="/kejadian" />
+    <div className="stagger flex flex-col gap-4">
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile accent="green" label="Kejadian hari ini" value={counts.today} icon={ClipboardList} href="/kejadian" />
+        <StatTile accent="teal" label="Kejadian minggu ini" value={counts.week} icon={CalendarRange} href="/kejadian" />
         <StatTile accent="sky" label="Menunggu verifikasi" value={pending} icon={ClipboardCheck} href="/kejadian/verifikasi" tone={pending ? "warn" : undefined} />
         {students !== null ? (
-          <StatTile accent="emerald" label="Siswa aktif" value={students} icon={GraduationCap} href="/master/siswa" />
+          <StatTile accent="lime" label="Siswa aktif" value={students} icon={GraduationCap} href="/master/siswa" />
         ) : (
-          <StatTile accent="emerald" label="Kasus BK aktif" value={openCases} icon={HeartHandshake} href="/bk/kasus" />
+          <StatTile accent="lime" label="Kasus BK aktif" value={openCases} icon={HeartHandshake} href="/bk/kasus" />
         )}
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
@@ -226,10 +226,10 @@ export async function WalasDashboard({ user }: { user: SessionUser }) {
   for (const r of rows) tally[r.color]++;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile accent="violet" label="Kejadian minggu ini" value={counts.week} icon={ClipboardList} href="/kejadian" />
-        <StatTile accent="emerald" label="Siswa aman" value={tally.green} icon={ShieldCheck} />
+    <div className="stagger flex flex-col gap-4">
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile accent="teal" label="Kejadian minggu ini" value={counts.week} icon={ClipboardList} href="/kejadian" />
+        <StatTile accent="lime" label="Siswa aman" value={tally.green} icon={ShieldCheck} />
         <StatTile accent="amber" label="Perlu perhatian" value={tally.amber} icon={AlertTriangle} tone={tally.amber ? "warn" : undefined} />
         <StatTile accent="rose" label="Kritis" value={tally.red} icon={ShieldAlert} tone={tally.red ? "bad" : undefined} />
       </div>
@@ -321,12 +321,12 @@ export async function BkDashboard({ user }: { user: SessionUser }) {
   void user;
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile accent="blue" label="Kasus baru" value={count("BARU")} icon={HeartHandshake} href="/bk/kasus" tone={count("BARU") ? "warn" : undefined} />
-        <StatTile accent="violet" label="Dijadwalkan" value={count("DIJADWALKAN")} icon={CalendarClock} href="/bk/kasus" />
+    <div className="stagger flex flex-col gap-4">
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile accent="green" label="Kasus baru" value={count("BARU")} icon={HeartHandshake} href="/bk/kasus" tone={count("BARU") ? "warn" : undefined} />
+        <StatTile accent="teal" label="Dijadwalkan" value={count("DIJADWALKAN")} icon={CalendarClock} href="/bk/kasus" />
         <StatTile accent="sky" label="Proses pendampingan" value={count("PROSES_PENDAMPINGAN")} icon={ShieldCheck} href="/bk/kasus" />
-        <StatTile accent="emerald" label="Menunggu evaluasi" value={count("MENUNGGU_EVALUASI")} icon={ClipboardCheck} href="/bk/kasus" />
+        <StatTile accent="lime" label="Menunggu evaluasi" value={count("MENUNGGU_EVALUASI")} icon={ClipboardCheck} href="/bk/kasus" />
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
@@ -399,11 +399,11 @@ export async function KepsekDashboard({ user }: { user: SessionUser }) {
     ...pendingCases.map((c) => ({ href: `/bk/kasus/${c.id}`, title: `Kasus — ${c.student.name}`, sub: c.title })),
   ];
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile accent="violet" label="Kejadian minggu ini" value={counts.week} icon={ClipboardList} href="/kejadian" />
+    <div className="stagger flex flex-col gap-4">
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile accent="teal" label="Kejadian minggu ini" value={counts.week} icon={ClipboardList} href="/kejadian" />
         <StatTile accent="rose" label="Pelanggaran berat (30 hari)" value={severe} icon={ShieldAlert} tone={severe ? "bad" : undefined} />
-        <StatTile accent="emerald" label="Kasus BK aktif" value={openCases} icon={HeartHandshake} href="/bk/kasus" />
+        <StatTile accent="lime" label="Kasus BK aktif" value={openCases} icon={HeartHandshake} href="/bk/kasus" />
         <StatTile accent="sky" label="Menunggu persetujuan" value={approvals.length} icon={FileClock} href="/bk/surat?filter=perlu-approval" tone={approvals.length ? "warn" : undefined} />
       </div>
       {approvals.length > 0 && (
@@ -460,10 +460,10 @@ export async function GuruDashboard({ user }: { user: SessionUser }) {
   ]);
   const pending = mine.filter((m) => m.status === "MENUNGGU_VERIFIKASI").length;
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile accent="blue" label="Laporan hari ini" value={counts.today} icon={ClipboardList} href="/kejadian" />
-        <StatTile accent="violet" label="Laporan minggu ini" value={counts.week} icon={CalendarRange} href="/kejadian" />
+    <div className="stagger flex flex-col gap-4">
+      <div className="stagger grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile accent="green" label="Laporan hari ini" value={counts.today} icon={ClipboardList} href="/kejadian" />
+        <StatTile accent="teal" label="Laporan minggu ini" value={counts.week} icon={CalendarRange} href="/kejadian" />
         <StatTile accent="sky" label="Menunggu verifikasi" value={pending} icon={ClipboardCheck} href="/kejadian?status=MENUNGGU_VERIFIKASI" />
       </div>
       <Card>

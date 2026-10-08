@@ -7,7 +7,7 @@ import { loadThresholds, pointsForStudents } from "@/lib/points-db";
 import { nextThreshold, statusColor } from "@/lib/points";
 import { formatLongDate, formatTime } from "@/lib/date";
 import { LETTER_TYPE_LABEL } from "@/lib/constants";
-import { PageHeader } from "@/components/page-header";
+import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
 import { EmptyState } from "@/components/empty-state";
 import { PointsBadge } from "@/components/status-badges";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,9 +37,14 @@ export default async function OrtuPage() {
 
   return (
     <>
-      <PageHeader title={`Selamat datang, ${user.name}`} description={`Portal orang tua/wali murid · TA ${year?.name ?? "-"}`} />
+      <WelcomeBanner
+        name={user.name.split(",")[0]!.trim()}
+        roleLabel="Portal orang tua / wali murid"
+        dateLabel={formatLongDate(new Date())}
+        yearLabel={year ? `TA ${year.name}` : "Belum ada tahun ajaran aktif"}
+      />
       {letters.length > 0 && (
-        <div className="mb-4 flex flex-col gap-2">
+        <div className="stagger mb-4 flex flex-col gap-2">
           {letters.map((l) => (
             <Link key={l.id} href={`/konfirmasi/${l.responseToken}`}>
               <Card className="border-warning/50 bg-warning/10 transition-colors hover:border-warning">
@@ -65,7 +70,7 @@ export default async function OrtuPage() {
           <EmptyState title="Data anak belum tertaut" description="Hubungi sekolah untuk menautkan akun Anda." />
         </Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="stagger grid gap-3 sm:grid-cols-2">
           {children.map((s) => {
             const p = points.get(s.id) ?? 0;
             const next = nextThreshold(thresholds, p);

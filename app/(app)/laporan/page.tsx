@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { DateRangeFilter } from "@/components/date-range-filter";
 import { FilterSelect } from "@/components/filter-select";
 import { LevelBadge } from "@/components/level-badge";
-import { SimpleBarChart } from "@/components/charts/simple-bar-chart";
+import { LazySimpleBarChart as SimpleBarChart } from "@/components/charts/lazy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";

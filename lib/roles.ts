@@ -48,7 +48,7 @@ export const ROUTE_RULES: RouteRule[] = (
 ).sort((a, b) => b.prefix.length - a.prefix.length);
 
 /** Route publik (tanpa login). */
-export const PUBLIC_PREFIXES = ["/login", "/verifikasi", "/konfirmasi", "/api/auth", "/api/cron", "/api/public"];
+export const PUBLIC_PREFIXES = ["/beranda", "/login", "/verifikasi", "/konfirmasi", "/api/auth", "/api/cron", "/api/public"];
 
 export function isPublicPath(pathname: string) {
   return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));

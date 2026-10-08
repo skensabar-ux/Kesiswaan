@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getSettings } from "@/lib/settings";
@@ -79,7 +80,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
               Akun Anda dinonaktifkan. Hubungi administrator sekolah.
             </p>
           )}
-          <LoginForm callbackUrl={sp(params.callbackUrl)} otpEnabled={settings.parentOtpEnabled && settings.waEnabled} />
+          <LoginForm callbackUrl={sp(params.callbackUrl)} otpEnabled={settings.parentOtpEnabled && settings.waEnabled} defaultTab={sp(params.peran) === "ortu" ? "parent" : "staff"} />
+          <p className="mt-6 text-center text-sm text-muted-foreground lg:text-left">
+            <Link href="/beranda" className="font-medium text-primary hover:underline">
+              ← Kembali ke beranda
+            </Link>
+          </p>
         </div>
       </section>
     </main>

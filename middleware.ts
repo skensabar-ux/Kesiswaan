@@ -13,6 +13,8 @@ export default auth((req) => {
   const isApi = pathname.startsWith("/api/");
 
   if (!user) {
+    // pengunjung yang belum masuk melihat halaman beranda (landing page) di alamat utama
+    if (pathname === "/") return NextResponse.rewrite(new URL("/beranda", req.nextUrl));
     if (isApi) return NextResponse.json({ error: "Tidak terautentikasi" }, { status: 401 });
     const url = new URL("/login", req.nextUrl);
     url.searchParams.set("callbackUrl", pathname + search);
@@ -32,5 +34,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|robots.txt).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|robots.txt|landing/).*)"],
 };
