@@ -31,9 +31,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="flex min-h-dvh">
       <Sidebar role={role} schoolName={settings.schoolName} />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur md:h-16 md:px-6">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border/70 bg-background/75 px-4 backdrop-blur-lg md:h-16 md:px-6">
           <div className="flex min-w-0 items-center gap-2 md:hidden">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">K</div>
+            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-brand-2 text-sm font-extrabold text-white">K</div>
             <span className="truncate text-sm font-semibold">Kesiswaan</span>
           </div>
           <div className="ml-auto flex items-center gap-1">

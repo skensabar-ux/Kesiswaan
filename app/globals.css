@@ -4,14 +4,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: oklch(0.985 0.002 247);
-  --foreground: oklch(0.21 0.03 265);
+  --background: oklch(0.976 0.006 255);
+  --foreground: oklch(0.22 0.035 265);
   --card: oklch(1 0 0);
   --card-foreground: var(--foreground);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.47 0.14 255);
+  --primary: oklch(0.52 0.19 262);
   --primary-foreground: oklch(0.985 0 0);
+  --brand-2: oklch(0.55 0.2 290);
   --secondary: oklch(0.955 0.01 255);
   --secondary-foreground: oklch(0.25 0.04 265);
   --muted: oklch(0.955 0.006 255);
@@ -22,21 +23,28 @@
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.6 0.15 150);
   --warning: oklch(0.75 0.16 75);
-  --border: oklch(0.91 0.008 255);
-  --input: oklch(0.88 0.01 255);
-  --ring: oklch(0.47 0.14 255);
-  --radius: 0.6rem;
+  --border: oklch(0.915 0.01 260);
+  --input: oklch(0.885 0.012 260);
+  --ring: oklch(0.52 0.19 262);
+  --radius: 0.75rem;
+  /* sidebar gelap bermerek (sama di mode terang & gelap) */
+  --sidebar: oklch(0.25 0.07 268);
+  --sidebar-foreground: oklch(0.96 0.01 265);
+  --sidebar-muted: oklch(0.75 0.04 265);
+  --sidebar-accent: oklch(0.33 0.09 268);
+  --sidebar-border: oklch(0.32 0.07 268);
 }
 
 .dark {
-  --background: oklch(0.17 0.02 265);
+  --background: oklch(0.165 0.022 268);
   --foreground: oklch(0.95 0.005 255);
-  --card: oklch(0.21 0.022 265);
+  --card: oklch(0.205 0.026 268);
   --card-foreground: var(--foreground);
   --popover: oklch(0.21 0.022 265);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.68 0.14 255);
+  --primary: oklch(0.68 0.16 262);
   --primary-foreground: oklch(0.17 0.02 265);
+  --brand-2: oklch(0.66 0.17 290);
   --secondary: oklch(0.27 0.025 265);
   --secondary-foreground: oklch(0.95 0.005 255);
   --muted: oklch(0.26 0.02 265);
@@ -49,7 +57,12 @@
   --warning: oklch(0.8 0.15 80);
   --border: oklch(0.3 0.02 265);
   --input: oklch(0.34 0.02 265);
-  --ring: oklch(0.68 0.14 255);
+  --ring: oklch(0.68 0.16 262);
+  --sidebar: oklch(0.14 0.03 268);
+  --sidebar-foreground: oklch(0.95 0.01 265);
+  --sidebar-muted: oklch(0.7 0.03 265);
+  --sidebar-accent: oklch(0.24 0.05 268);
+  --sidebar-border: oklch(0.24 0.035 268);
 }
 
 @theme inline {
@@ -74,11 +87,19 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-2: var(--brand-2);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --shadow-card: 0 1px 2px oklch(0.3 0.05 265 / 0.05), 0 6px 20px -8px oklch(0.3 0.05 265 / 0.12);
+  --shadow-lift: 0 2px 4px oklch(0.3 0.05 265 / 0.06), 0 14px 30px -10px oklch(0.3 0.05 265 / 0.22);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @layer base {
@@ -95,6 +116,17 @@
   input[type="time"]::-webkit-calendar-picker-indicator {
     @apply dark:invert;
   }
+}
+
+/* latar gradasi bermerek: banner sambutan, login */
+.bg-brand {
+  background-image:
+    radial-gradient(120% 140% at 100% 0%, oklch(0.62 0.2 300 / 0.55) 0%, transparent 55%),
+    linear-gradient(135deg, oklch(0.42 0.17 265) 0%, oklch(0.5 0.2 268) 45%, oklch(0.52 0.21 285) 100%);
+}
+.bg-dots {
+  background-image: radial-gradient(oklch(1 0 0 / 0.14) 1px, transparent 1px);
+  background-size: 18px 18px;
 }
 
 .pb-safe {

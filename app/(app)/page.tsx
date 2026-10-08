@@ -4,7 +4,7 @@ import { requirePageRole } from "@/lib/rbac";
 import { getActiveAcademicYear } from "@/lib/settings";
 import { REPORTER_ROLES, ROLE_LABEL, STAFF_ROLES } from "@/lib/roles";
 import { formatLongDate } from "@/lib/date";
-import { PageHeader } from "@/components/page-header";
+import { WelcomeBanner } from "@/components/dashboard/welcome-banner";
 import { Button } from "@/components/ui/button";
 import { BkDashboard, GuruDashboard, KepsekDashboard, PksDashboard, WalasDashboard } from "@/components/dashboard/dashboards";
 
@@ -25,12 +25,14 @@ export default async function DashboardPage() {
             : PksDashboard;
   return (
     <>
-      <PageHeader
-        title={`Halo, ${user.name.split(",")[0]!.trim()}`}
-        description={`${ROLE_LABEL[user.role]} · ${formatLongDate(new Date())}${year ? ` · TA ${year.name}` : " · belum ada tahun ajaran aktif"}`}
-        actions={
+      <WelcomeBanner
+        name={user.name.split(",")[0]!.trim()}
+        roleLabel={ROLE_LABEL[user.role]}
+        dateLabel={formatLongDate(new Date())}
+        yearLabel={year ? `TA ${year.name}` : "Belum ada tahun ajaran aktif"}
+        action={
           REPORTER_ROLES.includes(user.role) && (
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="bg-white bg-none text-primary shadow-lg shadow-black/10 hover:bg-white/90">
               <Link href="/kejadian/baru">
                 <Plus /> Catat Kejadian
               </Link>

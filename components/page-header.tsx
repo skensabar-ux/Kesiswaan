@@ -20,7 +20,7 @@ export function PageHeader({
             <ChevronLeft className="size-4" /> Kembali
           </Link>
         )}
-        <h1 className="text-xl font-bold tracking-tight md:text-2xl">{title}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight md:text-[1.75rem]">{title}</h1>
         {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

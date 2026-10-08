@@ -25,16 +25,16 @@ export function LoginForm({ callbackUrl, otpEnabled }: { callbackUrl: string; ot
   const [parentState, parentAction, parentPending] = useActionState(loginParent, null);
 
   return (
-    <Card>
-      <div className="grid grid-cols-2 gap-1 border-b p-1">
+    <Card className="shadow-lift">
+      <div className="m-4 mb-0 grid grid-cols-2 gap-1 rounded-xl bg-muted p-1 md:m-5 md:mb-0">
         {(["staff", "parent"] as const).map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             className={cn(
-              "rounded-md py-2 text-sm font-medium transition-colors",
-              tab === t ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent",
+              "rounded-lg py-2 text-sm font-semibold transition-all",
+              tab === t ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground",
             )}
           >
             {t === "staff" ? "Guru / Staf" : "Orang Tua"}

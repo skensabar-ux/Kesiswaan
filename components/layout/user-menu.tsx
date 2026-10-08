@@ -19,7 +19,7 @@ export function UserMenu({ name, roleLabel }: { name: string; roleLabel: string 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="h-9 gap-2 px-1.5 sm:px-2">
-          <span className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
+          <span className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-brand-2 text-xs font-bold text-white shadow-sm">
             {initials(name)}
           </span>
           <span className="hidden max-w-40 truncate text-sm sm:inline">{name}</span>
